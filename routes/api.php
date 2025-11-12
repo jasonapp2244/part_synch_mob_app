@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use Chatify\Http\Controllers\Api\MessagesController;
+use App\Http\Controllers\Admin\BoostPackageController;
 
 // Vendor Controllers
 use App\Http\Controllers\Vendor\{
@@ -61,8 +62,11 @@ Route::get('/vendor_type', [VendorTypeController::class, 'vendorType']);        
 
 // ────────────────────────────────
 // Protected Routes (Requires Sanctum Auth)
+Route::get('/admin/boost-packages', [BoostPackageController::class, 'index']); // ⏳ pending
 // ────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
+
+    //________________ Admin APIs ________________
 
     // ───────────── Auth & Profile ─────────────
     Route::post('/reset_password', [AuthController::class, 'resetPassword']);       // ✅ Done

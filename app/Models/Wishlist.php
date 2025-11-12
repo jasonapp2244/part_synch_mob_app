@@ -28,9 +28,3 @@ class Wishlist extends Model
 }
 
 
-
-// domi
-Lunch kul
-450+100+200
-@asad
-

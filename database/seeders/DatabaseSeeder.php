@@ -15,6 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call([
+            BoostPackageSeeder::class,
+        ]);
+
         DB::table('orders')->insert([
             [
                 'user_id' => 2,
