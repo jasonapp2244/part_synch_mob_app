@@ -44,17 +44,18 @@
                     href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     {{-- <img src="assets/images/avatars/avatar-2.png" class="user-img" alt="user avatar"> --}}
                     <div class="user-info">
-                        <p class="user-name mb-0">Admin Name</p>
-                        {{-- <p class="designattion mb-0">Email</p> --}}
+                        <p class="user-name mb-0">{{ auth()->user()?->first_name ?? auth()->user()?->email ?? 'Admin' }}</p>
+                        <p class="designattion mb-0">{{ auth()->user()?->email ?? '' }}</p>
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item d-flex align-items-center" href="javascript:;"><i
-                                class="bx bx-user fs-5"></i><span>Profile</span></a>
-                    </li>
-
-                    <li><a class="dropdown-item d-flex align-items-center" href="javascript:;"><i
-                                class="bx bx-log-out-circle"></i><span>Logout</span></a>
+                    <li>
+                        <form method="POST" action="{{ route('admin.logout') }}">
+                            @csrf
+                            <button type="submit" class="dropdown-item d-flex align-items-center">
+                                <i class="bx bx-log-out-circle"></i><span>Logout</span>
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </div>

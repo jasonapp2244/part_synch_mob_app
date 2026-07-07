@@ -13,7 +13,7 @@ use App\Http\Controllers\Admin\{
 };
 
 use Illuminate\Support\Facades\Route;
-use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
+use Illuminate\Support\Facades\Auth;
 
 
 Route::get('/test', function () {
@@ -45,3 +45,11 @@ Route::get('/product-records', [ProductController::class, 'ProductRecords'])->na
 
 
 Route::get('/earning-records', [EarningController::class, 'EarningRecords'])->name('earning.records');
+
+
+Route::post('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/dashboard');
+})->name('admin.logout');

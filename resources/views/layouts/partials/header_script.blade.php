@@ -2,7 +2,8 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--favicon-->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('admin/images/favicon-32x32.png') }}" type="image/png" />
 
@@ -11,9 +12,7 @@
     <link href="{{ asset('admin/plugins/simplebar/css/simplebar.css') }}" rel="stylesheet" />
     <link href="{{ asset('admin/plugins/perfect-scrollbar/css/perfect-scrollbar.css') }}" rel="stylesheet" />
     <link href="{{ asset('admin/plugins/metismenu/css/metisMenu.min.css') }}" rel="stylesheet" />
-    {{-- datatable --}}
     <link href="{{ asset('admin/plugins/datatable/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet" />
-
 
     <!-- Loader -->
     <link href="{{ asset('admin/css/pace.min.css') }}" rel="stylesheet" />
@@ -35,5 +34,5 @@
     <link href="{{ asset('admin/css/semi-dark.css') }}" rel="stylesheet" />
     <link href="{{ asset('admin/css/header-colors.css') }}" rel="stylesheet" />
 
-    <title>@yield('title')Part Synch</title>
+    <title>@yield('title', 'Admin') - Part Synch</title>
 </head>
