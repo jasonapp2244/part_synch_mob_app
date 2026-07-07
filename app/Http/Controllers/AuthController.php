@@ -126,7 +126,6 @@ class AuthController extends Controller
             ));
             return response()->json([
                 'status' => true,
-                'otp' => $otp,
                 'message' => 'New OTP sent successfully to your email.',
             ]);
         } else {
@@ -298,7 +297,6 @@ class AuthController extends Controller
 
             return response()->json([
                 'status'  => true,
-                'code'    => $new_password,
                 'message' => 'New Password sent successfully to your email.',
             ]);
         } catch (\Exception $e) {
@@ -360,7 +358,7 @@ class AuthController extends Controller
         return response()->json([
             'status'  => true,
             'message' => 'Password updated successfully. Please log in again.',
-        ], 400);
+        ], 200);
     }
 
     /**

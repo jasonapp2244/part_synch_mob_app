@@ -506,13 +506,21 @@ class CheckoutController extends Controller
         $product = Product::findOrFail($request->product_id);
         $totalPrice = $product->price * $request->quantity;
 
+        // Step 3: Create a buy-now cart item (inactive status)
+        $newCartItem = Cart::create([
+            'user_id' => $userId,
+            'product_id' => $request->product_id,
+            'quantity' => $request->quantity ?? 1,
+            'price' => $product->price,
+            'status' => 'inactive',
+        ]);
 
-        // Step 6: Fetch the newly created cart item along with related data
+        // Step 4: Fetch the newly created cart item along with related data
         $cartItem = Cart::with([
             'product.productImages',
             'product.company',
             'deliveryAddress'
-        ])->find($cartItem->id);
+        ])->find($newCartItem->id);
 
 
 

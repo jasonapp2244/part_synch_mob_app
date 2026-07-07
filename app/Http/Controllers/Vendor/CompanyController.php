@@ -48,7 +48,7 @@ class CompanyController extends Controller
     ->where('sub_category_id', $id)
     ->where('status', 'active')
     ->get();
-    if (!$company) {
+    if ($company->isEmpty()) {
         return response()->json([
             'status'  => false,
             'message' => "Company not found."

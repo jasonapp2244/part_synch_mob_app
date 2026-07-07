@@ -27,14 +27,10 @@ class ProductController extends Controller
         }
 
         if ($user->role_id != 2) {
-            $products = Product::with('productImages')
-                ->where('user_id',  $id)
-                ->orderBy('id', 'desc')
-                ->paginate();
             return response()->json([
                 'status' => false,
                 'message' => 'You are not authorized to access this resource.',
-            ], 400);
+            ], 403);
         }
         $products = Product::with('productImages')
             ->where('user_id',  $user->id)
@@ -115,7 +111,7 @@ class ProductController extends Controller
             $uniqueSuffix = strtoupper(dechex(time() % 100000)) . rand(10000, 99999); // e.g. "3E8A7"
             $sku =  strtoupper($cleanName) . '-' . $uniqueSuffix;
             // return $sku;
-            $existingSku = Product::whereRaw('LOWER(sku) = ?', [$uniqueSuffix])->first();
+            $existingSku = Product::whereRaw('LOWER(sku) = ?', [strtolower($sku)])->first();
             if ($existingSku) {
                 // return "testing";
                 return response()->json([

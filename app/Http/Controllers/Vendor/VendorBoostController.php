@@ -899,7 +899,7 @@ class VendorBoostController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => false,
-                'message' => 'Failed to activate boPost',
+                'message' => 'Failed to activate boost',
                 'error' => $e->getMessage()
             ], 500);
         }
