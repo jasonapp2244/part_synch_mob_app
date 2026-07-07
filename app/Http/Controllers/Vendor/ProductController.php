@@ -174,7 +174,7 @@ class ProductController extends Controller
                 'original_price' => $product->price,
                 'stock_quantity' => $request->new_stock ?? 0,
                 'warranty'       => $product->warranty,
-                'created_by'     => $request->user_id,
+                'created_by'     => Auth::id(),
             ]);
 
             if ($request->has('new_stock')) {
@@ -264,7 +264,7 @@ class ProductController extends Controller
                 ], 400);
             }
 
-            $product->user_id                       = $request->user_id ?? $product->user_id;
+            $product->user_id                       = Auth::id() ?? $product->user_id;
             $product->vendor_id                     = $request->vendor_id ?? $product->vendor_id;
             $product->category_id                   = $request->category_id ?? $product->category_id;
             $product->sub_category_id               = $request->sub_category_id ?? $product->sub_category_id;
@@ -316,7 +316,7 @@ class ProductController extends Controller
                 $link->company_id     = $request->company_id;
                 $link->product_id     = $product->id;
                 $link->com_pro_cat_id = $request->company_product_categories_id;
-                $link->created_by     = $request->user_id;
+                $link->created_by     = Auth::id();
             }
 
             // Set all pivot fields only if they exist in request, otherwise retain old value
@@ -365,7 +365,7 @@ class ProductController extends Controller
                     } else {
                         $image->storeAs('product_images', $imageName);
                         $productImage = new ProductImage();
-                        $productImage->user_id = $request->user_id;
+                        $productImage->user_id = Auth::id();
                         $productImage->product_id = $product->id;
                         $productImage->name = $imageName;
                         $productImage->hash = $imageHash;

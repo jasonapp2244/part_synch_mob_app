@@ -26,59 +26,62 @@ class CartController extends Controller
             $userId = auth()->id();
             $product = Product::findOrFail($request->product_id);
 
-            $cartItem = Cart::where('user_id', $userId)
-                ->where('product_id', $request->product_id)
-                ->first();
+            return DB::transaction(function () use ($userId, $request, $product) {
+                $cartItem = Cart::where('user_id', $userId)
+                    ->where('product_id', $request->product_id)
+                    ->lockForUpdate()
+                    ->first();
 
-            if ($cartItem) {
-                $newQty = $cartItem->quantity + $request->quantity;
+                if ($cartItem) {
+                    $newQty = $cartItem->quantity + $request->quantity;
 
-                if ($newQty <= 0) {
-                    $cartItem->delete();
-                    return response()->json(['message' => 'Item removed from cart (quantity zero)'], 200);
+                    if ($newQty <= 0) {
+                        $cartItem->delete();
+                        return response()->json(['message' => 'Item removed from cart (quantity zero)'], 200);
+                    }
+
+                    $newTotalPrice = $newQty * $product->price;
+
+                    $cartItem->update([
+                        'quantity' => $newQty,
+                        'price' => $newTotalPrice,
+                        'status' => 'active',
+                    ]);
+
+                    return response()->json([
+                        'message' => 'Cart updated',
+                        'data' => $cartItem
+                    ], 200);
                 }
 
-                $newTotalPrice = $newQty * $product->price;
+                if ($request->quantity <= 0) {
+                    return response()->json([
+                        'message' => 'Quantity must be greater than 0 for new items'
+                    ], 400);
+                }
 
-                $cartItem->update([
-                    'quantity' => $newQty,
-                    'price' => $newTotalPrice,
-                    'status' => 'active' // Set to active when cart is updated
+                $totalPrice = $request->quantity * $product->price;
+
+                $cartItem = Cart::create([
+                    'user_id' => $userId,
+                    'product_id' => $request->product_id,
+                    'quantity' => $request->quantity,
+                    'price' => $totalPrice,
+                    'status' => 'active',
+                ]);
+
+                DeliveryAddress::create([
+                    'user_id' => $userId,
+                    'product_id' => $request->product_id,
+                    'cart_id' => $cartItem->id,
+                    'status' => 'inactive'
                 ]);
 
                 return response()->json([
-                    'message' => 'Cart updated',
+                    'message' => 'Item added to cart',
                     'data' => $cartItem
                 ], 200);
-            }
-
-            if ($request->quantity <= 0) {
-                return response()->json([
-                    'message' => 'Quantity must be greater than 0 for new items'
-                ], 400);
-            }
-
-            $totalPrice = $request->quantity * $product->price;
-
-            $cartItem = Cart::create([
-                'user_id' => $userId,
-                'product_id' => $request->product_id,
-                'quantity' => $request->quantity,
-                'price' => $totalPrice,
-                'status' => 'active' // Set to active when cart item is added
-            ]);
-
-            DeliveryAddress::create([
-                'user_id' => $userId,
-                'product_id' => $request->product_id,
-                'cart_id' => $cartItem->id,
-                'status' => 'inactive'
-            ]);
-
-            return response()->json([
-                'message' => 'Item added to cart',
-                'data' => $cartItem
-            ], 200);
+            });
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'message' => 'Validation failed',

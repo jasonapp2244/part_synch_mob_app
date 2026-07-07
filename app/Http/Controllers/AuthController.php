@@ -54,6 +54,7 @@ class AuthController extends Controller
             $user->password     = Hash::make($request->password);
             $user->phone_number = $request->phone_number;
             $user->otp          = $otp;
+            $user->otp_expires_at = now()->addMinutes(10);
 
             if ($accountType === 'business') {
                 $user->vendor_type_id = $request->vendor_type_id;
@@ -118,6 +119,7 @@ class AuthController extends Controller
         $otp_number = rand(1000, 9999);
         $otp        = str_pad((string) $otp_number, 4, '0', STR_PAD_LEFT);
         $user->otp = $otp;
+        $user->otp_expires_at = now()->addMinutes(10);
         if ($user->save()) {
             Mail::to($user->email)->send(new OtpMail(
                 ['otp' => $otp],
@@ -141,6 +143,7 @@ class AuthController extends Controller
         try {
 
             $validator = Validator::make($request->all(), [
+                'email' => 'required|email',
                 'otp' => 'required|digits:4',
             ]);
 
@@ -153,27 +156,37 @@ class AuthController extends Controller
                 ], 400);
             }
 
-            $otpCheck = User::where('otp', $request->otp)->first();
+            $otpCheck = User::where('email', $request->email)
+                ->where('otp', $request->otp)
+                ->first();
 
-            if ($otpCheck) {
-                $otpCheck->otp    = null;
-                $otpCheck->status = 'active';
-                $otpCheck->save();
-                if ($otpCheck) {
-                    return response()->json([
-                        'status'  => true,
-                        'data'    => [],
-                        'message' => 'OTP verified successfully.',
-                        'user'    => $otpCheck,
-                    ]);
-                }
-            } else {
+            if (!$otpCheck) {
                 return response()->json([
                     'status'  => false,
                     'data'    => [],
-                    'message' => 'Invalid OTP Or Expire. Please check your email and try again.',
-                ]);
+                    'message' => 'Invalid OTP. Please check your email and try again.',
+                ], 400);
             }
+
+            if ($otpCheck->otp_expires_at && now()->greaterThan($otpCheck->otp_expires_at)) {
+                return response()->json([
+                    'status'  => false,
+                    'data'    => [],
+                    'message' => 'OTP has expired. Please request a new one.',
+                ], 400);
+            }
+
+            $otpCheck->otp = null;
+            $otpCheck->otp_expires_at = null;
+            $otpCheck->status = 'active';
+            $otpCheck->save();
+
+            return response()->json([
+                'status'  => true,
+                'data'    => [],
+                'message' => 'OTP verified successfully.',
+                'user'    => $otpCheck,
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,

@@ -208,58 +208,56 @@ class HomeController extends Controller
 
     public function viewMorePproducts()
     {
-        $view_more_products = Product::with('ProductImages')
+        $products = Product::with('ProductImages')
             ->where('status', 'active')
             ->where('stock_quantity', '!=', 0)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(20);
 
         return response()->json([
             'status' => true,
-            'message' => 'More companies fetched successfully',
-            'data' => $view_more_products
+            'message' => 'Products fetched successfully',
+            'data' => $products
         ]);
     }
 
     public function viewMoreCompines()
     {
-        $view_more_companies = Company::where('status', 'active')
+        $companies = Company::where('status', 'active')
             ->orderBy('created_at', 'desc')
-            ->get();
-
+            ->paginate(20);
 
         return response()->json([
             'status' => true,
-            'message' => 'More companies fetched successfully',
-            'data' => $view_more_companies
+            'message' => 'Companies fetched successfully',
+            'data' => $companies
         ]);
     }
 
     public function viewMoreVendors()
     {
-        $view_more_vendor_shope = User::where('role_id', 2)->where('status', 'active')
+        $vendors = User::where('role_id', 2)->where('status', 'active')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(20);
 
         return response()->json([
             'status' => true,
-            'message' => 'More vendors fetched successfully',
-            'data' => $view_more_vendor_shope
+            'message' => 'Vendors fetched successfully',
+            'data' => $vendors
         ]);
     }
-
 
     public function viewMoreConmpanyRelatedProdct(Request $request, $productId = NULL)
     {
         $links = CompanyProductCategoryLinks::with(['company', 'user'])
             ->where('product_id', $productId)
-            ->get();
+            ->paginate(20);
 
-        $data = $links->map(function ($link) {
+        $data = $links->through(function ($link) {
             return [
                 'company_name'   => $link->company->company_name ?? null,
-                'vendor_name'    => $link->vendor->first_name ?? null,
-                'company_image' => $link->company->company_image,
+                'vendor_name'    => $link->user->first_name ?? null,
+                'company_image'  => $link->company->company_image ?? null,
                 'price'          => $link->custom_price,
                 'stock_quantity' => $link->stock_quantity,
                 'warranty'       => $link->warranty,
@@ -274,9 +272,9 @@ class HomeController extends Controller
     {
         $links = CompanyProductCategoryLinks::with(['product.productImages', 'user'])
             ->where('company_id', $companyId)
-            ->get();
+            ->paginate(20);
 
-        $data = $links->map(function ($link) {
+        $data = $links->through(function ($link) {
             return [
                 'product_name'     => $link->product->name ?? null,
                 'description'      => $link->product->description ?? null,
@@ -285,9 +283,9 @@ class HomeController extends Controller
                 'created_at'       => $link->product->created_at ?? null,
                 'price'            => $link->custom_price,
                 'stock_quantity'   => $link->stock_quantity,
-                'vendor_name'      => $link->vendor->first_name ?? null,
-                'vendor_email'     => $link->vendor->email ?? null,
-                'images'           => $link->product->productImages->pluck('image_url'), // all images
+                'vendor_name'      => $link->user->first_name ?? null,
+                'vendor_email'     => $link->user->email ?? null,
+                'images'           => $link->product->productImages->pluck('image_url'),
             ];
         });
 
@@ -298,16 +296,16 @@ class HomeController extends Controller
     {
         $products = Product::with('productImages')
             ->where('user_id', $vendorId)
-            ->get();
+            ->paginate(20);
 
-        $data = $products->map(function ($product) {
+        $data = $products->through(function ($product) {
             return [
                 'product_name'     => $product->name,
                 'description'      => $product->description,
-                'modal_number' => $product->modal_number,
-                'sku' => $product->sku,
-                'service_status'=>$product->service_status,
-                'brand'=>$product->brand,
+                'modal_number'     => $product->modal_number,
+                'sku'              => $product->sku,
+                'service_status'   => $product->service_status,
+                'brand'            => $product->brand,
                 'price'            => $product->price,
                 'stock_quantity'   => $product->stock_quantity,
                 'images'           => $product->productImages->pluck('image_url'),

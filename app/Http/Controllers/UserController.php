@@ -17,7 +17,7 @@ class UserController extends Controller
         if ($user) {
             return response()->json([
                 'status'  => true,
-                'message' => 'fethed user profile record successfully',
+                'message' => 'User profile fetched successfully',
                 'data'    => $user,
             ]);
         }

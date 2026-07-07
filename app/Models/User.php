@@ -42,6 +42,7 @@ class User extends Authenticatable
         'web_token',
         'token',
         'otp',
+        'otp_expires_at',
         'phone_number',
         'address',
         'city',
@@ -80,6 +81,7 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'otp_expires_at' => 'datetime',
         ];
     }
 
