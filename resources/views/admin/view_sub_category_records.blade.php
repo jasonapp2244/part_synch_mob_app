@@ -1,4 +1,5 @@
 @extends('layouts.admin')
+@section('title', 'Sub Categories')
 
 @section('content')
     <!--start page wrapper -->
@@ -6,15 +7,17 @@
         <div class="page-content">
             <!--breadcrumb-->
             <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-                <div class="breadcrumb-title pe-3">Tables</div>
+                <div class="breadcrumb-title pe-3">Catalog</div>
                 <div class="ps-3">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0 p-0">
-                            <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
-                            </li>
-                            <li class="breadcrumb-item active" aria-current="page">Sub Category Table</li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Sub Categories</li>
                         </ol>
                     </nav>
+                </div>
+                <div class="ms-auto">
+                    <span class="badge bg-gradient-cosmic text-white rounded-pill px-3 py-2">{{ $subCategories->count() }} Total</span>
                 </div>
             </div>
             <!--end breadcrumb-->
@@ -40,25 +43,24 @@
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $subCategory->sub_category_name ?? 'N/A' }}</td>
-                                    <td>{{ $subCategory->category->name ?? 'N/A' }}</td>
+                                    <td><span class="badge bg-gradient-scooter text-white rounded-pill px-3">{{ $subCategory->category->name ?? 'N/A' }}</span></td>
                                     <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox"
-                                                {{ $subCategory->status === 'active' ? 'checked' : '' }}
-                                                style="background-color: #a1a1a1;" disabled>
-                                            <label class="form-check-label">{{ ucfirst($subCategory->status ?? 'inactive') }}</label>
-                                        </div>
+                                        @if($subCategory->status === 'active')
+                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3">Active</span>
+                                        @else
+                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3">Inactive</span>
+                                        @endif
                                     </td>
                                     <td>{{ $subCategory->created_at ? $subCategory->created_at->format('d M Y') : 'N/A' }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-outline-secondary">
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
                                             <i class="bx bx-show me-0"></i>
                                         </button>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">No sub category records found.</td>
+                                    <td colspan="6" class="text-center text-muted py-4">No sub category records found.</td>
                                 </tr>
                                 @endforelse
                             </tbody>

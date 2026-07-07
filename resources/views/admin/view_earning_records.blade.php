@@ -1,4 +1,5 @@
 @extends('layouts.admin')
+@section('title', 'Earnings')
 
 @section('content')
     <!--start page wrapper -->
@@ -6,13 +7,12 @@
         <div class="page-content">
             <!--breadcrumb-->
             <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-                <div class="breadcrumb-title pe-3">Tables</div>
+                <div class="breadcrumb-title pe-3">Finance</div>
                 <div class="ps-3">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0 p-0">
-                            <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
-                            </li>
-                            <li class="breadcrumb-item active" aria-current="page">Earning Table</li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Earnings</li>
                         </ol>
                     </nav>
                 </div>
@@ -30,7 +30,7 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <p class="mb-0 text-secondary">Total Orders</p>
-                                    <h4 class="my-1 text-info">{{ $totalOrders }}</h4>
+                                    <h4 class="my-1 text-info">{{ number_format($totalOrders) }}</h4>
                                 </div>
                                 <div class="widgets-icons-2 rounded-circle bg-gradient-blues text-white ms-auto"><i class='bx bxs-cart'></i></div>
                             </div>
@@ -56,7 +56,7 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <p class="mb-0 text-secondary">Pending Orders</p>
-                                    <h4 class="my-1 text-warning">{{ $pendingOrders }}</h4>
+                                    <h4 class="my-1 text-warning">{{ number_format($pendingOrders) }}</h4>
                                 </div>
                                 <div class="widgets-icons-2 rounded-circle bg-gradient-orange text-white ms-auto"><i class='bx bx-time'></i></div>
                             </div>
@@ -69,7 +69,7 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <p class="mb-0 text-secondary">Completed</p>
-                                    <h4 class="my-1 text-danger">{{ $completedOrders }}</h4>
+                                    <h4 class="my-1 text-danger">{{ number_format($completedOrders) }}</h4>
                                 </div>
                                 <div class="widgets-icons-2 rounded-circle bg-gradient-burning text-white ms-auto"><i class='bx bx-check-circle'></i></div>
                             </div>
@@ -104,22 +104,22 @@
                                     <td>{{ ucfirst($order->payment_method ?? 'N/A') }}</td>
                                     <td>
                                         @if($order->order_status === 'delivered')
-                                            <span class="badge bg-success">Delivered</span>
+                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3">Delivered</span>
                                         @elseif($order->order_status === 'pending')
-                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            <span class="badge bg-gradient-blooker text-white rounded-pill px-3">Pending</span>
                                         @elseif($order->order_status === 'payment')
-                                            <span class="badge bg-info">Payment</span>
+                                            <span class="badge bg-gradient-blues text-white rounded-pill px-3">Payment</span>
                                         @elseif($order->order_status === 'cancelled')
-                                            <span class="badge bg-danger">Cancelled</span>
+                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3">Cancelled</span>
                                         @else
-                                            <span class="badge bg-secondary">{{ ucfirst($order->order_status) }}</span>
+                                            <span class="badge bg-secondary text-white rounded-pill px-3">{{ ucfirst($order->order_status) }}</span>
                                         @endif
                                     </td>
                                     <td>{{ $order->created_at ? $order->created_at->format('d M Y') : 'N/A' }}</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">No order records found.</td>
+                                    <td colspan="7" class="text-center text-muted py-4">No order records found.</td>
                                 </tr>
                                 @endforelse
                             </tbody>

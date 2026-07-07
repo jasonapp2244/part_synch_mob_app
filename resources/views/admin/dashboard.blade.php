@@ -1,4 +1,6 @@
 @extends('layouts.admin')
+@section('title', 'Dashboard')
+
 @section('content')
     <!--start page wrapper -->
     <div class="page-wrapper">

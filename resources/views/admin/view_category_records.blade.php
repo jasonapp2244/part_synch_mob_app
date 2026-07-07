@@ -1,4 +1,5 @@
 @extends('layouts.admin')
+@section('title', 'Categories')
 
 @section('content')
     <!--start page wrapper -->
@@ -6,15 +7,17 @@
         <div class="page-content">
             <!--breadcrumb-->
             <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-                <div class="breadcrumb-title pe-3">Tables</div>
+                <div class="breadcrumb-title pe-3">Catalog</div>
                 <div class="ps-3">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0 p-0">
-                            <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
-                            </li>
-                            <li class="breadcrumb-item active" aria-current="page">Category Table</li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Categories</li>
                         </ol>
                     </nav>
+                </div>
+                <div class="ms-auto">
+                    <span class="badge bg-gradient-ohhappiness text-white rounded-pill px-3 py-2">{{ $categories->count() }} Total</span>
                 </div>
             </div>
             <!--end breadcrumb-->
@@ -41,17 +44,17 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $category->name ?? 'N/A' }}</td>
                                     <td>{{ Str::limit($category->description ?? 'N/A', 50) }}</td>
-                                    <td>{{ $category->sub_categories_count }}</td>
+                                    <td><span class="badge bg-gradient-scooter text-white rounded-pill px-3">{{ $category->sub_categories_count }}</span></td>
                                     <td>{{ $category->created_at ? $category->created_at->format('d M Y') : 'N/A' }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-outline-secondary">
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
                                             <i class="bx bx-show me-0"></i>
                                         </button>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">No category records found.</td>
+                                    <td colspan="6" class="text-center text-muted py-4">No category records found.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
