@@ -17,14 +17,19 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
-                    <span class="badge bg-gradient-blues text-white rounded-pill px-3 py-2">{{ $users->count() }} Total</span>
+                    <span class="badge bg-gradient-blues text-white rounded-pill px-3 py-2 shadow-sm">{{ $users->count() }} Total Users</span>
                 </div>
             </div>
             <!--end breadcrumb-->
 
-            <h6 class="mb-0 text-uppercase">User Records</h6>
-            <hr />
-            <div class="card">
+            <div class="card radius-10 overflow-hidden">
+                <div class="card-header bg-gradient-cosmic p-3">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 text-white"><i class="bx bx-group me-2"></i>User Records</h6>
+                        </div>
+                    </div>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="example2" class="table table-striped table-bordered">
@@ -42,18 +47,25 @@
                                 @forelse($users as $index => $user)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $user->first_name }} {{ $user->last_name }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="widgets-icons rounded-circle bg-gradient-ibiza text-white me-2" style="width:32px;height:32px;font-size:13px;">
+                                                {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}
+                                            </div>
+                                            {{ $user->first_name }} {{ $user->last_name }}
+                                        </div>
+                                    </td>
                                     <td>{{ $user->email ?? 'N/A' }}</td>
                                     <td>{{ $user->phone_number ?? 'N/A' }}</td>
                                     <td>
                                         @if($user->status === 'active')
-                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3">Active</span>
+                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3 shadow-sm">Active</span>
                                         @else
-                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3">Inactive</span>
+                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3 shadow-sm">Inactive</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                        <button type="button" class="btn btn-sm btn-inverse-primary">
                                             <i class="bx bx-show me-0"></i>
                                         </button>
                                     </td>

@@ -17,14 +17,19 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
-                    <span class="badge bg-gradient-ohhappiness text-white rounded-pill px-3 py-2">{{ $categories->count() }} Total</span>
+                    <span class="badge bg-gradient-ohhappiness text-white rounded-pill px-3 py-2 shadow-sm">{{ $categories->count() }} Categories</span>
                 </div>
             </div>
             <!--end breadcrumb-->
 
-            <h6 class="mb-0 text-uppercase">Category Records</h6>
-            <hr />
-            <div class="card">
+            <div class="card radius-10 overflow-hidden">
+                <div class="card-header bg-gradient-ohhappiness p-3">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 text-white"><i class="bx bx-category me-2"></i>Category Records</h6>
+                        </div>
+                    </div>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="example2" class="table table-striped table-bordered">
@@ -42,12 +47,12 @@
                                 @forelse($categories as $index => $category)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $category->name ?? 'N/A' }}</td>
+                                    <td><span class="fw-bold">{{ $category->name ?? 'N/A' }}</span></td>
                                     <td>{{ Str::limit($category->description ?? 'N/A', 50) }}</td>
-                                    <td><span class="badge bg-gradient-scooter text-white rounded-pill px-3">{{ $category->sub_categories_count }}</span></td>
+                                    <td><span class="badge bg-gradient-scooter text-white rounded-pill px-3 shadow-sm">{{ $category->sub_categories_count }}</span></td>
                                     <td>{{ $category->created_at ? $category->created_at->format('d M Y') : 'N/A' }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                        <button type="button" class="btn btn-sm btn-inverse-primary">
                                             <i class="bx bx-show me-0"></i>
                                         </button>
                                     </td>

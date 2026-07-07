@@ -17,14 +17,19 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
-                    <span class="badge bg-gradient-cosmic text-white rounded-pill px-3 py-2">{{ $subCategories->count() }} Total</span>
+                    <span class="badge bg-gradient-cosmic text-white rounded-pill px-3 py-2 shadow-sm">{{ $subCategories->count() }} Sub Categories</span>
                 </div>
             </div>
             <!--end breadcrumb-->
 
-            <h6 class="mb-0 text-uppercase">Sub Category Records</h6>
-            <hr />
-            <div class="card">
+            <div class="card radius-10 overflow-hidden">
+                <div class="card-header bg-gradient-cosmic p-3">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 text-white"><i class="bx bx-subdirectory-right me-2"></i>Sub Category Records</h6>
+                        </div>
+                    </div>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="example2" class="table table-striped table-bordered">
@@ -42,18 +47,18 @@
                                 @forelse($subCategories as $index => $subCategory)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $subCategory->sub_category_name ?? 'N/A' }}</td>
-                                    <td><span class="badge bg-gradient-scooter text-white rounded-pill px-3">{{ $subCategory->category->name ?? 'N/A' }}</span></td>
+                                    <td><span class="fw-bold">{{ $subCategory->sub_category_name ?? 'N/A' }}</span></td>
+                                    <td><span class="badge bg-gradient-scooter text-white rounded-pill px-3 shadow-sm">{{ $subCategory->category->name ?? 'N/A' }}</span></td>
                                     <td>
                                         @if($subCategory->status === 'active')
-                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3">Active</span>
+                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3 shadow-sm">Active</span>
                                         @else
-                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3">Inactive</span>
+                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3 shadow-sm">Inactive</span>
                                         @endif
                                     </td>
                                     <td>{{ $subCategory->created_at ? $subCategory->created_at->format('d M Y') : 'N/A' }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                        <button type="button" class="btn btn-sm btn-inverse-primary">
                                             <i class="bx bx-show me-0"></i>
                                         </button>
                                     </td>

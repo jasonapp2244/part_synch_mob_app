@@ -29,6 +29,8 @@
 
     @include('layouts.partials.footer_script')
 
+    @yield('scripts')
+
 </body>
 
 </html>

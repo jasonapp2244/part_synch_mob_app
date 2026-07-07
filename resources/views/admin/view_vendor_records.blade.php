@@ -17,14 +17,19 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
-                    <span class="badge bg-gradient-quepal text-white rounded-pill px-3 py-2">{{ $vendors->count() }} Total</span>
+                    <span class="badge bg-gradient-quepal text-white rounded-pill px-3 py-2 shadow-sm">{{ $vendors->count() }} Total Vendors</span>
                 </div>
             </div>
             <!--end breadcrumb-->
 
-            <h6 class="mb-0 text-uppercase">Vendor Records</h6>
-            <hr />
-            <div class="card">
+            <div class="card radius-10 overflow-hidden">
+                <div class="card-header bg-gradient-deepblue p-3">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 text-white"><i class="bx bx-store-alt me-2"></i>Vendor Records</h6>
+                        </div>
+                    </div>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="example2" class="table table-striped table-bordered">
@@ -42,18 +47,25 @@
                                 @forelse($vendors as $index => $vendor)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $vendor->first_name }} {{ $vendor->last_name }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="widgets-icons rounded-circle bg-gradient-scooter text-white me-2" style="width:32px;height:32px;font-size:13px;">
+                                                {{ strtoupper(substr($vendor->first_name ?? 'V', 0, 1)) }}
+                                            </div>
+                                            {{ $vendor->first_name }} {{ $vendor->last_name }}
+                                        </div>
+                                    </td>
                                     <td>{{ $vendor->business_type ?? 'N/A' }}</td>
                                     <td>{{ $vendor->phone_number ?? 'N/A' }}</td>
                                     <td>
                                         @if($vendor->status === 'active')
-                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3">Active</span>
+                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3 shadow-sm">Active</span>
                                         @else
-                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3">Inactive</span>
+                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3 shadow-sm">Inactive</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                        <button type="button" class="btn btn-sm btn-inverse-primary">
                                             <i class="bx bx-show me-0"></i>
                                         </button>
                                     </td>

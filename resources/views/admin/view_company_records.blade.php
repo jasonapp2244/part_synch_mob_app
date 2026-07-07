@@ -17,14 +17,19 @@
                     </nav>
                 </div>
                 <div class="ms-auto">
-                    <span class="badge bg-gradient-ibiza text-white rounded-pill px-3 py-2">{{ $companies->count() }} Total</span>
+                    <span class="badge bg-gradient-ibiza text-white rounded-pill px-3 py-2 shadow-sm">{{ $companies->count() }} Companies</span>
                 </div>
             </div>
             <!--end breadcrumb-->
 
-            <h6 class="mb-0 text-uppercase">Company Records</h6>
-            <hr />
-            <div class="card">
+            <div class="card radius-10 overflow-hidden">
+                <div class="card-header bg-gradient-ibiza p-3">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 text-white"><i class="bx bx-buildings me-2"></i>Company Records</h6>
+                        </div>
+                    </div>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="example2" class="table table-striped table-bordered">
@@ -42,18 +47,25 @@
                                 @forelse($companies as $index => $company)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $company->company_name ?? 'N/A' }}</td>
-                                    <td>{{ $company->user ? $company->user->first_name . ' ' . $company->user->last_name : 'N/A' }}</td>
+                                    <td><span class="fw-bold">{{ $company->company_name ?? 'N/A' }}</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="widgets-icons rounded-circle bg-gradient-cosmic text-white me-2" style="width:32px;height:32px;font-size:13px;">
+                                                {{ strtoupper(substr($company->user->first_name ?? 'V', 0, 1)) }}
+                                            </div>
+                                            {{ $company->user ? $company->user->first_name . ' ' . $company->user->last_name : 'N/A' }}
+                                        </div>
+                                    </td>
                                     <td>{{ Str::limit($company->description ?? 'N/A', 50) }}</td>
                                     <td>
                                         @if($company->status === 'active')
-                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3">Active</span>
+                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3 shadow-sm">Active</span>
                                         @else
-                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3">Inactive</span>
+                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3 shadow-sm">Inactive</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                        <button type="button" class="btn btn-sm btn-inverse-primary">
                                             <i class="bx bx-show me-0"></i>
                                         </button>
                                     </td>

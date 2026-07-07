@@ -19,59 +19,64 @@
             </div>
             <!--end breadcrumb-->
 
-            <h6 class="mb-0 text-uppercase">Earning Overview</h6>
-            <hr />
-
             <!-- Summary Cards -->
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mb-3">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mb-2">
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-4 border-info">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div>
-                                    <p class="mb-0 text-secondary">Total Orders</p>
-                                    <h4 class="my-1 text-info">{{ number_format($totalOrders) }}</h4>
+                    <div class="card radius-10 overflow-hidden">
+                        <div class="card-body p-0">
+                            <div class="bg-gradient-deepblue p-4">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <p class="mb-1 text-white" style="opacity:0.85">Total Orders</p>
+                                        <h3 class="mb-0 text-white">{{ number_format($totalOrders) }}</h3>
+                                    </div>
+                                    <div class="ms-auto"><i class='bx bxs-cart font-30 text-white'></i></div>
                                 </div>
-                                <div class="widgets-icons-2 rounded-circle bg-gradient-blues text-white ms-auto"><i class='bx bxs-cart'></i></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-4 border-success">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div>
-                                    <p class="mb-0 text-secondary">Total Revenue</p>
-                                    <h4 class="my-1 text-success">${{ number_format($totalRevenue, 2) }}</h4>
+                    <div class="card radius-10 overflow-hidden">
+                        <div class="card-body p-0">
+                            <div class="bg-gradient-ohhappiness p-4">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <p class="mb-1 text-white" style="opacity:0.85">Total Revenue</p>
+                                        <h3 class="mb-0 text-white">${{ number_format($totalRevenue, 2) }}</h3>
+                                    </div>
+                                    <div class="ms-auto"><i class='bx bx-dollar-circle font-30 text-white'></i></div>
                                 </div>
-                                <div class="widgets-icons-2 rounded-circle bg-gradient-ohhappiness text-white ms-auto"><i class='bx bx-dollar'></i></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-4 border-warning">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div>
-                                    <p class="mb-0 text-secondary">Pending Orders</p>
-                                    <h4 class="my-1 text-warning">{{ number_format($pendingOrders) }}</h4>
+                    <div class="card radius-10 overflow-hidden">
+                        <div class="card-body p-0">
+                            <div class="bg-gradient-blooker p-4">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <p class="mb-1 text-white" style="opacity:0.85">Pending Orders</p>
+                                        <h3 class="mb-0 text-white">{{ number_format($pendingOrders) }}</h3>
+                                    </div>
+                                    <div class="ms-auto"><i class='bx bx-time font-30 text-white'></i></div>
                                 </div>
-                                <div class="widgets-icons-2 rounded-circle bg-gradient-orange text-white ms-auto"><i class='bx bx-time'></i></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col">
-                    <div class="card radius-10 border-start border-0 border-4 border-danger">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div>
-                                    <p class="mb-0 text-secondary">Completed</p>
-                                    <h4 class="my-1 text-danger">{{ number_format($completedOrders) }}</h4>
+                    <div class="card radius-10 overflow-hidden">
+                        <div class="card-body p-0">
+                            <div class="bg-gradient-quepal p-4">
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <p class="mb-1 text-white" style="opacity:0.85">Completed</p>
+                                        <h3 class="mb-0 text-white">{{ number_format($completedOrders) }}</h3>
+                                    </div>
+                                    <div class="ms-auto"><i class='bx bx-check-circle font-30 text-white'></i></div>
                                 </div>
-                                <div class="widgets-icons-2 rounded-circle bg-gradient-burning text-white ms-auto"><i class='bx bx-check-circle'></i></div>
                             </div>
                         </div>
                     </div>
@@ -79,7 +84,14 @@
             </div>
 
             <!-- Orders Table -->
-            <div class="card">
+            <div class="card radius-10 overflow-hidden">
+                <div class="card-header bg-gradient-burning p-3">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0 text-white"><i class="bx bx-receipt me-2"></i>All Orders</h6>
+                        </div>
+                    </div>
+                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="example2" class="table table-striped table-bordered">
@@ -98,21 +110,21 @@
                                 @forelse($orders as $index => $order)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $order->order_number ?? 'N/A' }}</td>
+                                    <td><span class="fw-bold">{{ $order->order_number ?? 'N/A' }}</span></td>
                                     <td>{{ $order->orderItems->count() }}</td>
-                                    <td>${{ number_format($order->orderItems->sum('total_price'), 2) }}</td>
+                                    <td><span class="fw-bold">${{ number_format($order->orderItems->sum('total_price'), 2) }}</span></td>
                                     <td>{{ ucfirst($order->payment_method ?? 'N/A') }}</td>
                                     <td>
                                         @if($order->order_status === 'delivered')
-                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3">Delivered</span>
+                                            <span class="badge bg-gradient-quepal text-white rounded-pill px-3 shadow-sm">Delivered</span>
                                         @elseif($order->order_status === 'pending')
-                                            <span class="badge bg-gradient-blooker text-white rounded-pill px-3">Pending</span>
+                                            <span class="badge bg-gradient-blooker text-white rounded-pill px-3 shadow-sm">Pending</span>
                                         @elseif($order->order_status === 'payment')
-                                            <span class="badge bg-gradient-blues text-white rounded-pill px-3">Payment</span>
+                                            <span class="badge bg-gradient-blues text-white rounded-pill px-3 shadow-sm">Payment</span>
                                         @elseif($order->order_status === 'cancelled')
-                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3">Cancelled</span>
+                                            <span class="badge bg-gradient-bloody text-white rounded-pill px-3 shadow-sm">Cancelled</span>
                                         @else
-                                            <span class="badge bg-secondary text-white rounded-pill px-3">{{ ucfirst($order->order_status) }}</span>
+                                            <span class="badge bg-secondary text-white rounded-pill px-3 shadow-sm">{{ ucfirst($order->order_status) }}</span>
                                         @endif
                                     </td>
                                     <td>{{ $order->created_at ? $order->created_at->format('d M Y') : 'N/A' }}</td>
