@@ -5,7 +5,10 @@ use App\Http\Controllers\Admin\{
     UserController,
     FeaturedController,
     CategoryController,
-    SubCategoryController
+    SubCategoryController,
+    CompanyController,
+    ProductController,
+    EarningController
 
 };
 
@@ -33,3 +36,12 @@ Route::get('/category-records', [CategoryController::class, 'CategoryRecords'])-
 
 
 Route::get('sub-category-records', [SubCategoryController::class, 'SubCategoryRecords'])->name('sub.category.records');
+
+
+Route::get('/company-records', [CompanyController::class, 'CompanyRecords'])->name('company.records');
+
+
+Route::get('/product-records', [ProductController::class, 'ProductRecords'])->name('product.records');
+
+
+Route::get('/earning-records', [EarningController::class, 'EarningRecords'])->name('earning.records');

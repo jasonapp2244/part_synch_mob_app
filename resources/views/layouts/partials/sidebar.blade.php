@@ -36,7 +36,7 @@
             <div class="menu-title">Users</div>
         </a>
         <ul>
-            <a href="{{ route('user.records') }}"><i class='bx bx-radio-circle'></i>View Users</a></li>
+            <li><a href="{{ route('user.records') }}"><i class='bx bx-radio-circle'></i>View Users</a></li>
         </ul>
     </li>
 
@@ -56,7 +56,7 @@
             <div class="menu-title">Category</div>
         </a>
         <ul>
-            <li><a href="#"><i class='bx bx-radio-circle'></i>View Category</a></li>
+            <li><a href="{{ route('category.records') }}"><i class='bx bx-radio-circle'></i>View Category</a></li>
         </ul>
     </li>
 
@@ -66,7 +66,7 @@
             <div class="menu-title">Sub Category</div>
         </a>
         <ul>
-            <li><a href="#"><i class='bx bx-radio-circle'></i>View Sub Category</a></li>
+            <li><a href="{{ route('sub.category.records') }}"><i class='bx bx-radio-circle'></i>View Sub Category</a></li>
         </ul>
     </li>
 
@@ -76,7 +76,7 @@
             <div class="menu-title">Company</div>
         </a>
         <ul>
-            <li><a href="#"><i class='bx bx-radio-circle'></i>View Company</a></li>
+            <li><a href="{{ route('company.records') }}"><i class='bx bx-radio-circle'></i>View Company</a></li>
         </ul>
     </li>
 
@@ -86,7 +86,7 @@
             <div class="menu-title">Earning</div>
         </a>
         <ul>
-            <li><a href="#"><i class='bx bx-radio-circle'></i>View Earning</a></li>
+            <li><a href="{{ route('earning.records') }}"><i class='bx bx-radio-circle'></i>View Earning</a></li>
         </ul>
     </li>
 
@@ -96,7 +96,7 @@
             <div class="menu-title">Products</div>
         </a>
         <ul>
-            <li><a href="#"><i class='bx bx-radio-circle'></i>View Products</a></li>
+            <li><a href="{{ route('product.records') }}"><i class='bx bx-radio-circle'></i>View Products</a></li>
         </ul>
     </li>
 
