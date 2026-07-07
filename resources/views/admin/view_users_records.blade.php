@@ -29,23 +29,25 @@
                                 <tr>
                                     <th>S.no</th>
                                     <th>Name</th>
-                                    <th>Phone Number </th>
+                                    <th>Email</th>
+                                    <th>Phone Number</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @forelse($users as $index => $user)
                                 <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-
-                                    <td>61363636364</td>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $user->first_name }} {{ $user->last_name }}</td>
+                                    <td>{{ $user->email ?? 'N/A' }}</td>
+                                    <td>{{ $user->phone_number ?? 'N/A' }}</td>
                                     <td>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                style="background-color: #a1a1a1;">
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
+                                            <input class="form-check-input" type="checkbox"
+                                                {{ $user->status === 'active' ? 'checked' : '' }}
+                                                style="background-color: #a1a1a1;" disabled>
+                                            <label class="form-check-label">{{ ucfirst($user->status ?? 'inactive') }}</label>
                                         </div>
                                     </td>
                                     <td>
@@ -54,187 +56,11 @@
                                         </button>
                                     </td>
                                 </tr>
+                                @empty
                                 <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-
-                                    <td>61363636364</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                style="background-color: #a1a1a1;">
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
-                                    </td>
+                                    <td colspan="6" class="text-center">No user records found.</td>
                                 </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-                                    <td>61363636364</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                style="background-color: #a1a1a1;">
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-                                    <td>61363636364</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                style="background-color: #a1a1a1;">
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-                                    <td>61363636364</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                style="background-color: #a1a1a1;">
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-                                    <td>61363636364</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                style="background-color: #a1a1a1;">
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-                                    <td>61363636364</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                style="background-color: #a1a1a1;">
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-                                    <td>61363636364</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                style="background-color: #a1a1a1;">
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-                                    <td>61363636364</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                style="background-color: #a1a1a1;">
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-                                    <td>61363636364</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                style="background-color: #a1a1a1;">
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Harry</td>
-                                    <td>61363636364</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="statusSwitch" checked=""
-                                                >
-                                            <label class="form-check-label" for="statusSwitch"
-                                                id="statusLabel">Active</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
-                                    </td>
-                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -242,23 +68,5 @@
             </div>
         </div>
     </div>
-
-
-    <script>
-        document.getElementById("statusSwitch").addEventListener("change", function() {
-            let label = document.getElementById("statusLabel");
-            if (this.checked) {
-                label.textContent = "Active";
-                label.classList.remove("text-danger");
-                label.classList.add("text-success");
-            } else {
-                label.textContent = "Inactive";
-                label.classList.remove("text-success");
-                label.classList.add("text-danger");
-            }
-        });
-    </script>
-
-
     <!--end page wrapper -->
 @endsection

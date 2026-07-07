@@ -12,14 +12,14 @@
                         <ol class="breadcrumb mb-0 p-0">
                             <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
                             </li>
-                            <li class="breadcrumb-item active" aria-current="page">Category Table</li>
+                            <li class="breadcrumb-item active" aria-current="page">Sub Category Table</li>
                         </ol>
                     </nav>
                 </div>
             </div>
             <!--end breadcrumb-->
 
-            <h6 class="mb-0 text-uppercase">Category Records</h6>
+            <h6 class="mb-0 text-uppercase">Sub Category Records</h6>
             <hr />
             <div class="card">
                 <div class="card-body">
@@ -28,21 +28,28 @@
                             <thead>
                                 <tr>
                                     <th>S.no</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Sub Categories</th>
+                                    <th>Sub Category Name</th>
+                                    <th>Parent Category</th>
+                                    <th>Status</th>
                                     <th>Created At</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($categories as $index => $category)
+                                @forelse($subCategories as $index => $subCategory)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $category->name ?? 'N/A' }}</td>
-                                    <td>{{ Str::limit($category->description ?? 'N/A', 50) }}</td>
-                                    <td>{{ $category->sub_categories_count }}</td>
-                                    <td>{{ $category->created_at ? $category->created_at->format('d M Y') : 'N/A' }}</td>
+                                    <td>{{ $subCategory->sub_category_name ?? 'N/A' }}</td>
+                                    <td>{{ $subCategory->category->name ?? 'N/A' }}</td>
+                                    <td>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox"
+                                                {{ $subCategory->status === 'active' ? 'checked' : '' }}
+                                                style="background-color: #a1a1a1;" disabled>
+                                            <label class="form-check-label">{{ ucfirst($subCategory->status ?? 'inactive') }}</label>
+                                        </div>
+                                    </td>
+                                    <td>{{ $subCategory->created_at ? $subCategory->created_at->format('d M Y') : 'N/A' }}</td>
                                     <td>
                                         <button type="button" class="btn btn-outline-secondary">
                                             <i class="bx bx-show me-0"></i>
@@ -51,7 +58,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">No category records found.</td>
+                                    <td colspan="6" class="text-center">No sub category records found.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
