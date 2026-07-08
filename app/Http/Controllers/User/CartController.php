@@ -26,6 +26,27 @@ class CartController extends Controller
             $userId = auth()->id();
             $product = Product::findOrFail($request->product_id);
 
+            if (!$product->is_active || $product->status !== 'active') {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'This product is currently unavailable.',
+                ], 400);
+            }
+
+            if ($product->stock_quantity <= 0) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'This product is out of stock.',
+                ], 400);
+            }
+
+            if ($request->quantity > $product->stock_quantity) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Only ' . $product->stock_quantity . ' items available in stock.',
+                ], 400);
+            }
+
             return DB::transaction(function () use ($userId, $request, $product) {
                 $cartItem = Cart::where('user_id', $userId)
                     ->where('product_id', $request->product_id)
@@ -231,7 +252,6 @@ class CartController extends Controller
             ], 404);
         }
 
-        // Delete associated delivery address
         DeliveryAddress::where('cart_id', $cartItem->id)->delete();
         $cartItem->delete();
 

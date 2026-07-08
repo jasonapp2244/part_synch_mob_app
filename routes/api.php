@@ -175,6 +175,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/order-status', [UserOrderController::class, 'orderStatus']);
 
         // Wishlist
+        Route::get('/wishlist', [UserWishlistController::class, 'getWishlist']);
         Route::post('/store-wishlist', [UserWishlistController::class, 'storeWishlist']);
         Route::delete('/remove-wishlist', [UserWishlistController::class, 'removeWishlist']);
 

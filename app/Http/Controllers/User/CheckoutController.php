@@ -24,27 +24,23 @@ class CheckoutController extends Controller
 {
     public function addDeliveryAddress(Request $request)
     {
-        // dd('here');
         $request->validate([
             'cart_id' => 'required',
-            // 'full_name' => 'required|string|max:255',
-            // 'phone_number' => 'required|string|max:20',
-            // 'address_line1' => 'required|string|max:255',
-            // 'address_line2' => 'nullable|string|max:255',
-            // 'city' => 'required|string|max:100',
-            // 'state' => 'required|string|max:100',
-            // 'country' => 'required|string|max:100',
-            // 'postal_code' => 'required|string|max:20',
+            'full_name' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:20',
+            'address_line1' => 'required|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'country' => 'required|string|max:100',
+            'postal_code' => 'required|string|max:20',
         ]);
 
         $userId = auth()->id();
 
-        // Get all inactive delivery records for the user
         $deliveryRecords = DeliveryAddress::where('user_id', $userId)->where('cart_id', $request->cart_id)
             ->where('status', 'inactive')
             ->get();
-            // dd($deliveryRecords);
-        // dd($deliveryRecords->toArray());
         if ($deliveryRecords->isEmpty()) {
             return response()->json([
                 'message' => 'No inactive delivery addresses found for the user.',
