@@ -214,4 +214,30 @@ class CartController extends Controller
         }
     }
 
+    public function removeCartItem(Request $request)
+    {
+        $request->validate([
+            'cart_id' => 'required|exists:cart,id',
+        ]);
+
+        $cartItem = Cart::where('id', $request->cart_id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$cartItem) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Cart item not found.',
+            ], 404);
+        }
+
+        // Delete associated delivery address
+        DeliveryAddress::where('cart_id', $cartItem->id)->delete();
+        $cartItem->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Item removed from cart successfully.',
+        ]);
+    }
 }

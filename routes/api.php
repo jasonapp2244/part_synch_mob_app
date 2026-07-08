@@ -37,7 +37,7 @@ use App\Http\Controllers\User\{
 };
 
 // ────────────────────────────────
-// Test Route
+// Test & Utility Routes
 // ────────────────────────────────
 Route::get('test', function () {
     return response()->json(['status' => 'testings']);
@@ -50,32 +50,42 @@ Route::get('cache-clear', function() {
     Artisan::call('view:clear');
     return "Cleared!";
 });
+
 // ────────────────────────────────
-// Public Auth Routes
+// Public Auth Routes (Rate Limited)
 // ────────────────────────────────
-Route::post('/signup', [AuthController::class, 'signup']);                      //✅ Done
-Route::post('/mail_testing', [AuthController::class, 'mailTesting']);           //✅ Done
-Route::post('/resend-otp', [AuthController::class, 'resendOtp']);               //✅ Done
-Route::post('/otp-verification', [AuthController::class, 'otpVerification']);   //✅ Done
-Route::post('/signin', [AuthController::class, 'signin']);                      //✅ Done (token generation pending)
-Route::post('/forgot_password', [AuthController::class, 'forgotPassword']);     //✅ Done
-Route::get('/vendor_type', [VendorTypeController::class, 'vendorType']);        //⏳ Not Implemented (NI)
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/signup', [AuthController::class, 'signup']);
+    Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+    Route::post('/otp-verification', [AuthController::class, 'otpVerification']);
+    Route::post('/signin', [AuthController::class, 'signin']);
+    Route::post('/forgot_password', [AuthController::class, 'forgotPassword']);
+});
+
+Route::post('/mail_testing', [AuthController::class, 'mailTesting']);
+Route::get('/vendor_type', [VendorTypeController::class, 'vendorType']);
+
+// ────────────────────────────────
+// Admin API
+// ────────────────────────────────
+Route::get('/admin/boost-packages', [BoostPackageController::class, 'index']);
 
 // ────────────────────────────────
 // Protected Routes (Requires Sanctum Auth)
-Route::get('/admin/boost-packages', [BoostPackageController::class, 'index']); // ⏳ pending
 // ────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
-    //________________ Admin APIs ________________
+    // ───────────── Auth & Profile (Any Role) ─────────────
+    Route::post('/reset_password', [AuthController::class, 'resetPassword']);
+    Route::get('/profile', [UserController::class, 'viewProfile']);
+    Route::post('/update_profile', [UserController::class, 'updateProfile']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 
-    // ───────────── Auth & Profile ─────────────
-    Route::post('/reset_password', [AuthController::class, 'resetPassword']);       // ✅ Done
-    Route::get('/profile', [UserController::class, 'viewProfile']);                 // ✅ Done
-    Route::post('/update_profile', [UserController::class, 'updateProfile']);       // ✅ Done
+    // ───────────── Vendor APIs (role_id = 2) ─────────────
+    Route::prefix('vendor')->middleware('role:2')->group(function () {
 
-    // ───────────── Vendor APIs ─────────────
-    Route::prefix('vendor')->group(function () {
+        // Dashboard Stats
+        Route::get('dashboard', [VendorProductController::class, 'vendorDashboard']);
 
         // Category, Subcategory, Company, Product Category
         Route::get('categories', [VendorCategoryController::class, 'index']);
@@ -86,8 +96,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Product Management
         Route::post('/add_product', [VendorProductController::class, 'addProduct']);
         Route::get('/get-all-products/{id?}', [VendorProductController::class, 'getAllProduct'])->name('vendor.store');
-        Route::get('/show_product/{id?}', [VendorProductController::class, 'showProduct']);             // ⏳ NI
-        Route::post('/update_product/{id?}', [VendorProductController::class, 'updateProduct']);        // ⏳ NI
+        Route::get('/show_product/{id?}', [VendorProductController::class, 'showProduct']);
+        Route::post('/update_product/{id?}', [VendorProductController::class, 'updateProduct']);
         Route::delete('/delete_product/{id?}', [VendorProductController::class, 'deleteProduct']);
         Route::get('/get_product_home_screen', [VendorProductController::class, 'get_product_home_screen']);
 
@@ -109,7 +119,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Order Management
         Route::get('/order-view', [VendorOrderController::class, 'orderView']);
-        Route::post('/order-manage', [VendorOrderController::class, 'order-Manage']);
+        Route::post('/order-manage', [VendorOrderController::class, 'orderManage']);
 
         // Boost Management
         Route::prefix('boost')->group(function () {
@@ -119,7 +129,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/price-preview', [VendorBoostController::class, 'getPricePreview']);
             Route::post('/purchase', [VendorBoostController::class, 'purchaseBoost']);
             Route::post('/confirm-payment', [VendorBoostController::class, 'confirmBoostPayment']);
-            Route::post('/test-confirm-payment', [VendorBoostController::class, 'testConfirmBoostPayment']); // Testing only
+            Route::post('/test-confirm-payment', [VendorBoostController::class, 'testConfirmBoostPayment']);
             Route::post('/cancel', [VendorBoostController::class, 'cancelBoostPurchase']);
             Route::post('/delete', [VendorBoostController::class, 'deleteBoost']);
             Route::post('/boost-existing-products', [VendorBoostController::class, 'boostExistingProducts']);
@@ -127,8 +137,10 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/my-boosted-products', [VendorBoostController::class, 'getMyBoostedProducts']);
         });
     });
-    // ───────────── User Home APIs ─────────────
-    Route::prefix('user')->group(function () {
+
+    // ───────────── User APIs (role_id = 3) ─────────────
+    Route::prefix('user')->middleware('role:3')->group(function () {
+
         // Home Page
         Route::get('/search', [HomeController::class, 'search']);
         Route::get('/home', [HomeController::class, 'getHomeScreen']);
@@ -149,20 +161,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/get-all-product-companies-products-categoris', [ProductController::class, 'getProductsByCompanyCategoryModal']);
 
         // Cart
-        Route::post('/add-to-cart', [UserCartController::class, 'addOrUpdateCart']);//done
-        Route::get('/view-cart', [UserCartController::class, 'viewCart']); //done
-        Route::get('/cart_product_details', [UserCartController::class, 'cartProductDetails']); //done
+        Route::post('/add-to-cart', [UserCartController::class, 'addOrUpdateCart']);
+        Route::get('/view-cart', [UserCartController::class, 'viewCart']);
+        Route::get('/cart_product_details', [UserCartController::class, 'cartProductDetails']);
+        Route::delete('/remove-cart-item', [UserCartController::class, 'removeCartItem']);
 
         // Checkout & Order
-        Route::get('/cart-products', [UserCheckoutController::class, 'getAllCartProducts']); //done
-        Route::post('/add-delivery-address', [UserCheckoutController::class, 'addDeliveryAddress']);//done
-        Route::post('/checkout-products', [UserCheckoutController::class, 'checkOutProducts']);  //done
-        Route::post('/buy-now-product-details', [UserCheckoutController::class, 'buyNowProductDetails']); //done
+        Route::get('/cart-products', [UserCheckoutController::class, 'getAllCartProducts']);
+        Route::post('/add-delivery-address', [UserCheckoutController::class, 'addDeliveryAddress']);
+        Route::post('/checkout-products', [UserCheckoutController::class, 'checkOutProducts']);
+        Route::post('/buy-now-product-details', [UserCheckoutController::class, 'buyNowProductDetails']);
         Route::post('/order-create', [UserOrderController::class, 'orderCreate']);
         Route::get('/order-status', [UserOrderController::class, 'orderStatus']);
 
         // Wishlist
         Route::post('/store-wishlist', [UserWishlistController::class, 'storeWishlist']);
+        Route::delete('/remove-wishlist', [UserWishlistController::class, 'removeWishlist']);
 
         // Payment
         Route::post('payment/initiate', [UserPaymentController::class, 'initiatePayment']);
@@ -175,10 +189,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Boosted Products (User View)
         Route::get('/boosted-products/slider', [BoostedProductsController::class, 'getBoostedProductsSlider']);
         Route::get('/boosted-products/all', [BoostedProductsController::class, 'getAllBoostedProducts']);
-
     });
 
-    // ───────────── Chatify Routes ─────────────
+    // ───────────── Chatify Routes (Any Authenticated User) ─────────────
     Route::post('/sendMessage', [MessagesController::class, 'send'])->name('api.send.message');
     Route::post('/chat/auth', [MessagesController::class, 'pusherAuth'])->name('api.pusher.auth');
     Route::post('/idInfo', [MessagesController::class, 'idFetchData'])->name('api.idInfo');
@@ -193,8 +206,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/deleteConversation', [MessagesController::class, 'deleteConversation'])->name('api.conversation.delete');
     Route::post('/updateSettings', [MessagesController::class, 'updateSettings'])->name('api.avatar.update');
     Route::post('/setActiveStatus', [MessagesController::class, 'setActiveStatus'])->name('api.activeStatus.set');
-
-    // ───────────── Logout ─────────
-    Route::post('/logout', [AuthController::class, 'logout']); // ✅ Done
-
 });
