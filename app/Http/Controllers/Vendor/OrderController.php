@@ -18,12 +18,16 @@ class OrderController extends Controller
     {
         $vendorId = auth()->user()->id;
 
+        $status = $request->query('status');
+
         $orders = DB::table('orders as o')
             ->join('order_items as oi', 'o.id', '=', 'oi.order_id')
             ->join('products as p', 'oi.product_id', '=', 'p.id')
             ->leftJoin('product_images as pi', 'p.id', '=', 'pi.product_id')
             ->join('delivery_addresses as da', 'o.delivery_address_id', '=', 'da.id')
-            ->where('o.order_status', 'pending')
+            ->when($status, function ($query) use ($status) {
+                return $query->where('o.order_status', $status);
+            })
             ->where('o.vendor_id', $vendorId)
             ->select(
                 'o.user_id as user_id',

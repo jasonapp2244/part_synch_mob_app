@@ -26,6 +26,27 @@ class CartController extends Controller
             $userId = auth()->id();
             $product = Product::findOrFail($request->product_id);
 
+            if (!$product->is_active || $product->status !== 'active') {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'This product is currently unavailable.',
+                ], 400);
+            }
+
+            if ($product->stock_quantity <= 0) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'This product is out of stock.',
+                ], 400);
+            }
+
+            if ($request->quantity > $product->stock_quantity) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Only ' . $product->stock_quantity . ' items available in stock.',
+                ], 400);
+            }
+
             $cartItem = Cart::where('user_id', $userId)
                 ->where('product_id', $request->product_id)
                 ->first();
@@ -211,4 +232,29 @@ class CartController extends Controller
         }
     }
 
+    public function removeCartItem(Request $request)
+    {
+        $request->validate([
+            'cart_id' => 'required|exists:cart,id',
+        ]);
+
+        $cartItem = Cart::where('id', $request->cart_id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if (!$cartItem) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Cart item not found.',
+            ], 404);
+        }
+
+        DeliveryAddress::where('cart_id', $cartItem->id)->delete();
+        $cartItem->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Item removed from cart successfully.',
+        ]);
+    }
 }

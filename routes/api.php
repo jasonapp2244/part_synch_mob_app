@@ -149,9 +149,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/get-all-product-companies-products-categoris', [ProductController::class, 'getProductsByCompanyCategoryModal']);
 
         // Cart
-        Route::post('/add-to-cart', [UserCartController::class, 'addOrUpdateCart']);//done
-        Route::get('/view-cart', [UserCartController::class, 'viewCart']); //done
-        Route::get('/cart_product_details', [UserCartController::class, 'cartProductDetails']); //done
+        Route::post('/add-to-cart', [UserCartController::class, 'addOrUpdateCart']);
+        Route::get('/view-cart', [UserCartController::class, 'viewCart']);
+        Route::get('/cart_product_details', [UserCartController::class, 'cartProductDetails']);
+        Route::delete('/remove-cart-item', [UserCartController::class, 'removeCartItem']);
 
         // Checkout & Order
         Route::get('/cart-products', [UserCheckoutController::class, 'getAllCartProducts']); //done
@@ -162,7 +163,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/order-status', [UserOrderController::class, 'orderStatus']);
 
         // Wishlist
+        Route::get('/wishlist', [UserWishlistController::class, 'getWishlist']);
         Route::post('/store-wishlist', [UserWishlistController::class, 'storeWishlist']);
+        Route::delete('/remove-wishlist', [UserWishlistController::class, 'removeWishlist']);
 
         // Payment
         Route::post('payment/initiate', [UserPaymentController::class, 'initiatePayment']);

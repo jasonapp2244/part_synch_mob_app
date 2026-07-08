@@ -240,9 +240,81 @@ class WishlistController extends Controller
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to send emails or save wishlist.',
+                'status' => false,
+                'message' => 'Failed to save wishlist.',
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getWishlist()
+    {
+        $userId = Auth::id();
+
+        $wishlists = Wishlist::where('user_id', $userId)
+            ->with(['product.productImages', 'product.user'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $data = $wishlists->map(function ($item) {
+            if ($item->type === 'product' && $item->product) {
+                return [
+                    'wishlist_id' => $item->id,
+                    'type' => 'product',
+                    'product_id' => $item->product_id,
+                    'product_name' => $item->product->name ?? 'N/A',
+                    'product_price' => $item->product->price ?? 0,
+                    'product_image' => $item->product->productImages->first()->image_url ?? null,
+                    'vendor_name' => $item->product->user->first_name ?? 'N/A',
+                    'stock_quantity' => $item->product->stock_quantity ?? 0,
+                    'is_active' => $item->product->is_active,
+                    'created_at' => $item->created_at,
+                ];
+            } elseif ($item->type === 'vendor') {
+                $vendor = User::find($item->vendor_id);
+                return [
+                    'wishlist_id' => $item->id,
+                    'type' => 'vendor',
+                    'vendor_id' => $item->vendor_id,
+                    'vendor_name' => $vendor->first_name ?? 'N/A',
+                    'vendor_business' => $vendor->business_type ?? 'N/A',
+                    'vendor_image' => $vendor->profile_image ?? null,
+                    'created_at' => $item->created_at,
+                ];
+            }
+            return null;
+        })->filter()->values();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Wishlist fetched successfully',
+            'data' => $data,
+            'total' => $data->count(),
+        ]);
+    }
+
+    public function removeWishlist(Request $request)
+    {
+        $request->validate([
+            'wishlist_id' => 'required|exists:wishlists,id',
+        ]);
+
+        $wishlist = Wishlist::where('id', $request->wishlist_id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$wishlist) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Wishlist item not found.',
+            ], 404);
+        }
+
+        $wishlist->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Removed from wishlist successfully.',
+        ]);
     }
 }

@@ -82,7 +82,6 @@ class VendorMapController extends Controller
     //
     public function getNearestVendors(Request $request)
     {
-        dd('testing');
         $validatedData = $request->validate([
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
