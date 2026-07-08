@@ -48,7 +48,9 @@ Route::get('/earning-records', [EarningController::class, 'EarningRecords'])->na
 
 
 Route::post('/logout', function () {
-    Auth::logout();
+    if (Auth::check()) {
+        Auth::logout();
+    }
     request()->session()->invalidate();
     request()->session()->regenerateToken();
     return redirect('/dashboard');
