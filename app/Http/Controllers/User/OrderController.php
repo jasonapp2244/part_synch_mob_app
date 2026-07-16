@@ -138,6 +138,55 @@ class OrderController extends Controller
         return response()->json(['message' => 'Orders placed and emails sent successfully.']);
     }
 
+    public function orderHistory(Request $request)
+    {
+        $userId = auth()->id();
+
+        $orders = Order::with(['orderItems.product.productImages', 'deliveryAddress'])
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->paginate(15);
+
+        $data = $orders->getCollection()->map(function ($order) {
+            return [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => $order->order_status,
+                'total' => $order->orderItems->sum('total_price'),
+                'items_count' => $order->orderItems->count(),
+                'delivery_date' => $order->delivery_date,
+                'created_at' => $order->created_at?->format('d M Y H:i'),
+                'items' => $order->orderItems->map(function ($item) {
+                    return [
+                        'product_name' => $item->product->name ?? 'Deleted Product',
+                        'quantity' => $item->quantity,
+                        'price' => $item->price,
+                        'total_price' => $item->total_price,
+                        'image' => $item->product?->productImages?->first()?->image_url,
+                    ];
+                }),
+                'delivery_address' => $order->deliveryAddress ? [
+                    'full_name' => $order->deliveryAddress->full_name,
+                    'address' => $order->deliveryAddress->address_line1,
+                    'city' => $order->deliveryAddress->city,
+                    'state' => $order->deliveryAddress->state,
+                    'country' => $order->deliveryAddress->country,
+                ] : null,
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Order history fetched.',
+            'data' => $data,
+            'pagination' => [
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+                'total' => $orders->total(),
+            ],
+        ]);
+    }
+
     public function orderStatus(Request $request)
     {
         $userId = auth()->id();

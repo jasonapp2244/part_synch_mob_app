@@ -1,23 +1,26 @@
 @extends('layouts.admin')
 
 @section('content')
-    <!--start page wrapper -->
     <div class="page-wrapper">
         <div class="page-content">
-            <!--breadcrumb-->
             <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
                 <div class="breadcrumb-title pe-3">Tables</div>
                 <div class="ps-3">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0 p-0">
-                            <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
-                            </li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
                             <li class="breadcrumb-item active" aria-current="page">Earning Table</li>
                         </ol>
                     </nav>
                 </div>
             </div>
-            <!--end breadcrumb-->
+
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
             <h6 class="mb-0 text-uppercase">Earning Overview</h6>
             <hr />
@@ -92,6 +95,7 @@
                                     <th>Payment Method</th>
                                     <th>Status</th>
                                     <th>Date</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -103,23 +107,32 @@
                                     <td>${{ number_format($order->orderItems->sum('total_price'), 2) }}</td>
                                     <td>{{ ucfirst($order->payment_method ?? 'N/A') }}</td>
                                     <td>
-                                        @if($order->order_status === 'delivered')
-                                            <span class="badge bg-success">Delivered</span>
-                                        @elseif($order->order_status === 'pending')
-                                            <span class="badge bg-warning text-dark">Pending</span>
-                                        @elseif($order->order_status === 'payment')
-                                            <span class="badge bg-info">Payment</span>
-                                        @elseif($order->order_status === 'cancelled')
-                                            <span class="badge bg-danger">Cancelled</span>
-                                        @else
-                                            <span class="badge bg-secondary">{{ ucfirst($order->order_status) }}</span>
-                                        @endif
+                                        @php
+                                            $statusColors = [
+                                                'delivered' => 'bg-success',
+                                                'completed' => 'bg-success',
+                                                'pending' => 'bg-warning text-dark',
+                                                'payment' => 'bg-info',
+                                                'accept' => 'bg-primary',
+                                                'order_packed' => 'bg-info',
+                                                'shipping' => 'bg-primary',
+                                                'cancel' => 'bg-danger',
+                                                'cancelled' => 'bg-danger',
+                                            ];
+                                            $color = $statusColors[$order->order_status] ?? 'bg-secondary';
+                                        @endphp
+                                        <span class="badge {{ $color }}">{{ ucfirst(str_replace('_', ' ', $order->order_status)) }}</span>
                                     </td>
                                     <td>{{ $order->created_at ? $order->created_at->format('d M Y') : 'N/A' }}</td>
+                                    <td>
+                                        <a href="{{ route('order.details', $order->id) }}" class="btn btn-sm btn-outline-info">
+                                            <i class="bx bx-show"></i> View
+                                        </a>
+                                    </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">No order records found.</td>
+                                    <td colspan="8" class="text-center">No order records found.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -129,5 +142,4 @@
             </div>
         </div>
     </div>
-    <!--end page wrapper -->
 @endsection

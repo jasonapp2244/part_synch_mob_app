@@ -1,23 +1,26 @@
 @extends('layouts.admin')
 
 @section('content')
-    <!--start page wrapper -->
     <div class="page-wrapper">
         <div class="page-content">
-            <!--breadcrumb-->
             <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
                 <div class="breadcrumb-title pe-3">Tables</div>
                 <div class="ps-3">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0 p-0">
-                            <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
-                            </li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
                             <li class="breadcrumb-item active" aria-current="page">Products Table</li>
                         </ol>
                     </nav>
                 </div>
             </div>
-            <!--end breadcrumb-->
+
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
             <h6 class="mb-0 text-uppercase">Product Records</h6>
             <hr />
@@ -32,6 +35,7 @@
                                     <th>Price</th>
                                     <th>Stock</th>
                                     <th>Vendor</th>
+                                    <th>Featured</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -53,22 +57,34 @@
                                     </td>
                                     <td>{{ $product->user ? $product->user->first_name . ' ' . $product->user->last_name : 'N/A' }}</td>
                                     <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox"
-                                                {{ $product->is_active ? 'checked' : '' }}
-                                                style="background-color: #a1a1a1;" disabled>
-                                            <label class="form-check-label">{{ $product->is_active ? 'Active' : 'Inactive' }}</label>
-                                        </div>
+                                        <form action="{{ route('featured.toggle', $product->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm {{ $product->is_top ? 'btn-warning' : 'btn-outline-warning' }}">
+                                                <i class="bx {{ $product->is_top ? 'bx-star' : 'bx-star' }}"></i>
+                                                {{ $product->is_top ? 'Featured' : 'Feature' }}
+                                            </button>
+                                        </form>
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
+                                        <form action="{{ route('product.toggle.status', $product->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm {{ $product->status === 'active' ? 'btn-success' : 'btn-secondary' }}">
+                                                {{ ucfirst($product->status ?? 'inactive') }}
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewProductModal{{ $product->id }}">
+                                            <i class="bx bx-show"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteProductModal{{ $product->id }}">
+                                            <i class="bx bx-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="text-center">No product records found.</td>
+                                    <td colspan="8" class="text-center">No product records found.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -78,5 +94,67 @@
             </div>
         </div>
     </div>
-    <!--end page wrapper -->
+
+    @foreach($products as $product)
+    <!-- View Product Modal -->
+    <div class="modal fade" id="viewProductModal{{ $product->id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Product Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Name:</strong> {{ $product->name ?? 'N/A' }}</p>
+                            <p><strong>SKU:</strong> {{ $product->sku ?? 'N/A' }}</p>
+                            <p><strong>Modal Number:</strong> {{ $product->modal_number ?? 'N/A' }}</p>
+                            <p><strong>Price:</strong> ${{ number_format($product->price ?? 0, 2) }}</p>
+                            <p><strong>Stock:</strong> {{ $product->stock_quantity ?? 0 }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Brand:</strong> {{ $product->brand ?? 'N/A' }}</p>
+                            <p><strong>Vendor:</strong> {{ $product->user ? $product->user->first_name . ' ' . $product->user->last_name : 'N/A' }}</p>
+                            <p><strong>Status:</strong> <span class="badge {{ $product->status === 'active' ? 'bg-success' : 'bg-secondary' }}">{{ ucfirst($product->status ?? 'inactive') }}</span></p>
+                            <p><strong>Featured:</strong> {{ $product->is_top ? 'Yes' : 'No' }}</p>
+                            <p><strong>Created:</strong> {{ $product->created_at ? $product->created_at->format('d M Y') : 'N/A' }}</p>
+                        </div>
+                    </div>
+                    @if($product->description)
+                        <hr>
+                        <p><strong>Description:</strong><br>{{ $product->description }}</p>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteProductModal{{ $product->id }}" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form action="{{ route('product.destroy', $product->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Product</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete <strong>{{ $product->name }}</strong>?</p>
+                        <div class="alert alert-warning py-2">This action cannot be undone.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endforeach
 @endsection

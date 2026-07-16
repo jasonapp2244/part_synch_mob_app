@@ -38,35 +38,25 @@ class UserController extends Controller
 
             $accountType = ! empty($request->business_type) ? 'business' : 'user';
 
-            // Validation rules
-            // $rules = [
-            //     'full_name'    => 'required|string|max:255',
-            //     'phone_number' => 'required|string|max:15',
-            //     'address'      => 'required|string|max:255',
-            //     'city'         => 'required|string|max:255',
-            //     'state'        => 'required|string|max:255',
-            //     'country'      => 'required|string|max:255',
-            //     'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max
-            // ];
+            $rules = [
+                'first_name'    => 'nullable|string|max:255',
+                'phone_number'  => 'nullable|string|max:20',
+                'address'       => 'nullable|string|max:255',
+                'city'          => 'nullable|string|max:255',
+                'state'         => 'nullable|string|max:255',
+                'country'       => 'nullable|string|max:255',
+                'zipcode'       => 'nullable|string|max:20',
+                'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ];
 
-            // Additional rules for business users
-            // if ($accountType === 'business') {
-            //     $rules['business_name'] = 'required|string|max:255';
-            //     $rules['business_discription'] = 'required|string|max:500';
-            //     $rules['business_license'] = 'required|string|max:255';
-            //     $rules['business_logo'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'; // 2MB max
-            // }
+            if ($accountType === 'business') {
+                $rules['business_type'] = 'nullable|string|max:255';
+                $rules['business_description'] = 'nullable|string|max:500';
+                $rules['business_license'] = 'nullable|string|max:255';
+                $rules['business_logo'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048';
+            }
 
-            // Validate the request
-            // $validator = Validator::make($request->all(), $rules);
-            // if ($validator->fails()) {
-            //     return response()->json([
-            //         'status' => false,
-            //         'message' => 'Validation error',
-            //         'errors' => $validator->errors()->all(),
-            //     ], 400);
-            // }
-            // return $user;
+            $request->validate($rules);
 
             // $user = User::where('id', auth()->user()->id)->first();
 
@@ -99,18 +89,16 @@ class UserController extends Controller
             }
 
 
-            // if ($accountType === 'business' && $request->hasFile('business_logo')) {
+            if ($accountType === 'business' && $request->hasFile('business_logo')) {
+                if ($user->business_logo) {
+                    Storage::delete('business_logos/' . $user->business_logo);
+                }
 
-            //     if ($user->business_logo) {
-            //         Storage::delete('business_logos/' . $user->business_logo);
-            //     }
-
-
-            //     $logo     = $request->file('business_logo');
-            //     $logoName = 'business_logo_' . time() . '.' . $logo->getClientOriginalExtension();
-            //     $logo->storeAs('business_logos', $logoName);
-            //     $user->business_logo = $logoName;
-            // }
+                $logo = $request->file('business_logo');
+                $logoName = 'business_logo_' . time() . '.' . $logo->getClientOriginalExtension();
+                $logo->storeAs('business_logos', $logoName);
+                $user->business_logo = $logoName;
+            }
 
             $user->save();
 

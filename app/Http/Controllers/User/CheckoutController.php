@@ -483,12 +483,17 @@ class CheckoutController extends Controller
     ///
     public function buyNowProductDetails(Request $request)
     {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'nullable|integer|min:1',
+        ]);
+
         $userId = auth()->id();
 
-        // Step 1: Check if the product is already in the user's cart
+        // Step 1: Check if the product is already in the user's active cart
         $cart_record = Cart::where('product_id', $request->product_id)
             ->where('user_id', $userId)
-            ->where('status', 'inactive')
+            ->where('status', 'active')
             ->get();
 
         // Step 2: If the product is already in the cart, return a response
@@ -500,8 +505,34 @@ class CheckoutController extends Controller
         }
 
         $product = Product::findOrFail($request->product_id);
-        $totalPrice = $product->price * $request->quantity;
 
+        // Step 3: Validate stock
+        $latestStock = Stock::where('product_id', $product->id)->orderByDesc('id')->first();
+        $currentStock = $latestStock?->current_stock ?? $product->stock_quantity ?? 0;
+        $quantity = $request->quantity ?? 1;
+
+        if ($currentStock <= 0 || $quantity > $currentStock) {
+            return response()->json([
+                'status' => false,
+                'message' => "Product '{$product->name}' is out of stock."
+            ], 400);
+        }
+
+        // Step 4: Create cart item for buy-now
+        $cartItem = Cart::create([
+            'user_id' => $userId,
+            'product_id' => $product->id,
+            'quantity' => $quantity,
+            'price' => $product->price,
+            'status' => 'active',
+        ]);
+
+        // Step 5: Create inactive delivery address placeholder
+        DeliveryAddress::create([
+            'user_id' => $userId,
+            'cart_id' => $cartItem->id,
+            'status' => 'inactive',
+        ]);
 
         // Step 6: Fetch the newly created cart item along with related data
         $cartItem = Cart::with([

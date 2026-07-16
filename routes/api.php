@@ -34,6 +34,8 @@ use App\Http\Controllers\User\{
     CheckoutController as UserCheckoutController,
     PaymentController as UserPaymentController,
     BoostedProductsController,
+    NotificationController as UserNotificationController,
+    AddressController as UserAddressController,
 };
 
 // ────────────────────────────────
@@ -53,29 +55,32 @@ Route::get('cache-clear', function() {
 // ────────────────────────────────
 // Public Auth Routes
 // ────────────────────────────────
-Route::post('/signup', [AuthController::class, 'signup']);                      //✅ Done
-Route::post('/mail_testing', [AuthController::class, 'mailTesting']);           //✅ Done
-Route::post('/resend-otp', [AuthController::class, 'resendOtp']);               //✅ Done
-Route::post('/otp-verification', [AuthController::class, 'otpVerification']);   //✅ Done
-Route::post('/signin', [AuthController::class, 'signin']);                      //✅ Done (token generation pending)
-Route::post('/forgot_password', [AuthController::class, 'forgotPassword']);     //✅ Done
-Route::get('/vendor_type', [VendorTypeController::class, 'vendorType']);        //⏳ Not Implemented (NI)
+Route::post('/signup', [AuthController::class, 'signup']);
+Route::post('/mail_testing', [AuthController::class, 'mailTesting']);
+Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+Route::post('/otp-verification', [AuthController::class, 'otpVerification']);
+Route::post('/signin', [AuthController::class, 'signin']);
+Route::post('/forgot_password', [AuthController::class, 'forgotPassword']);
+Route::get('/vendor_type', [VendorTypeController::class, 'vendorType']);
 
 // ────────────────────────────────
 // Protected Routes (Requires Sanctum Auth)
-Route::get('/admin/boost-packages', [BoostPackageController::class, 'index']); // ⏳ pending
+Route::get('/admin/boost-packages', [BoostPackageController::class, 'index']);
 // ────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
     //________________ Admin APIs ________________
 
     // ───────────── Auth & Profile ─────────────
-    Route::post('/reset_password', [AuthController::class, 'resetPassword']);       // ✅ Done
-    Route::get('/profile', [UserController::class, 'viewProfile']);                 // ✅ Done
-    Route::post('/update_profile', [UserController::class, 'updateProfile']);       // ✅ Done
+    Route::post('/reset_password', [AuthController::class, 'resetPassword']);
+    Route::get('/profile', [UserController::class, 'viewProfile']);
+    Route::post('/update_profile', [UserController::class, 'updateProfile']);
 
-    // ───────────── Vendor APIs ─────────────
-    Route::prefix('vendor')->group(function () {
+    // ───────────── Vendor APIs (role_id = 2 only) ─────────────
+    Route::prefix('vendor')->middleware('role:2')->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard', [DashboardController::class, 'dashboard']);
 
         // Category, Subcategory, Company, Product Category
         Route::get('categories', [VendorCategoryController::class, 'index']);
@@ -86,8 +91,8 @@ Route::middleware('auth:sanctum')->group(function () {
         // Product Management
         Route::post('/add_product', [VendorProductController::class, 'addProduct']);
         Route::get('/get-all-products/{id?}', [VendorProductController::class, 'getAllProduct'])->name('vendor.store');
-        Route::get('/show_product/{id?}', [VendorProductController::class, 'showProduct']);             // ⏳ NI
-        Route::post('/update_product/{id?}', [VendorProductController::class, 'updateProduct']);        // ⏳ NI
+        Route::get('/show_product/{id?}', [VendorProductController::class, 'showProduct']);
+        Route::post('/update_product/{id?}', [VendorProductController::class, 'updateProduct']);
         Route::delete('/delete_product/{id?}', [VendorProductController::class, 'deleteProduct']);
         Route::get('/get_product_home_screen', [VendorProductController::class, 'get_product_home_screen']);
 
@@ -107,9 +112,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('nearest-vendors', [VendorMapController::class, 'getNearestVendors']);
         });
 
+        // Earnings
+        Route::get('/earnings', [DashboardController::class, 'earnings']);
+
         // Order Management
         Route::get('/order-view', [VendorOrderController::class, 'orderView']);
-        Route::post('/order-manage', [VendorOrderController::class, 'order-Manage']);
+        Route::post('/order-manage', [VendorOrderController::class, 'orderManage']);
 
         // Boost Management
         Route::prefix('boost')->group(function () {
@@ -127,26 +135,26 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/my-boosted-products', [VendorBoostController::class, 'getMyBoostedProducts']);
         });
     });
-    // ───────────── User Home APIs ─────────────
-    Route::prefix('user')->group(function () {
+    // ───────────── User APIs (role_id = 3 only) ─────────────
+    Route::prefix('user')->middleware('role:3')->group(function () {
         // Home Page
         Route::get('/search', [HomeController::class, 'search']);
         Route::get('/home', [HomeController::class, 'getHomeScreen']);
-        Route::get('/view-more-prdoucts', [HomeController::class, 'viewMorePproducts']);
-        Route::get('/view-more-company-related-proucts/{productId?}', [HomeController::class, 'viewMoreConmpanyRelatedProdct']);
+        Route::get('/view-more-products', [HomeController::class, 'viewMorePproducts']);
+        Route::get('/view-more-company-related-products/{productId?}', [HomeController::class, 'viewMoreConmpanyRelatedProdct']);
         Route::get('/view-more-product-related-company/{companyId?}', [HomeController::class, 'viewMoreProductRelatedCompany']);
         Route::get('/view-more-product-related-vendor/{vendorId?}', [HomeController::class, 'viewMoreProductRelatedVendor']);
         Route::get('/view-more-companies', [HomeController::class, 'viewMoreCompines']);
         Route::get('/view-more-vendors', [HomeController::class, 'viewMoreVendors']);
-        Route::get('/get-companies-by-product-categtegory', [HomeController::class, 'getCompaniesByProductCategory']);
+        Route::get('/get-companies-by-product-category', [HomeController::class, 'getCompaniesByProductCategory']);
         Route::get('/get-companies-product', [HomeController::class, 'getCompanyProducts']);
 
         // Product Filter
         Route::get('/get-product-details/{id?}', [ProductController::class, 'getProductDetails'])->name('product.details');
-        Route::get('/get-all-companies-products-categoris', [ProductController::class, 'getAllCompaniesProductCategory']);
-        Route::get('/get-all-related-companies-products-categoris', [ProductController::class, 'getAllRelatedCompaniesProductCategory']);
-        Route::get('/get-all-modal-companies-products-categoris', [ProductController::class, 'getModalNumbersByCategoryAndCompany']);
-        Route::get('/get-all-product-companies-products-categoris', [ProductController::class, 'getProductsByCompanyCategoryModal']);
+        Route::get('/get-all-companies-products-categories', [ProductController::class, 'getAllCompaniesProductCategory']);
+        Route::get('/get-all-related-companies-products-categories', [ProductController::class, 'getAllRelatedCompaniesProductCategory']);
+        Route::get('/get-all-modal-companies-products-categories', [ProductController::class, 'getModalNumbersByCategoryAndCompany']);
+        Route::get('/get-all-product-companies-products-categories', [ProductController::class, 'getProductsByCompanyCategoryModal']);
 
         // Cart
         Route::post('/add-to-cart', [UserCartController::class, 'addOrUpdateCart']);
@@ -155,25 +163,39 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/remove-cart-item', [UserCartController::class, 'removeCartItem']);
 
         // Checkout & Order
-        Route::get('/cart-products', [UserCheckoutController::class, 'getAllCartProducts']); //done
-        Route::post('/add-delivery-address', [UserCheckoutController::class, 'addDeliveryAddress']);//done
-        Route::post('/checkout-products', [UserCheckoutController::class, 'checkOutProducts']);  //done
-        Route::post('/buy-now-product-details', [UserCheckoutController::class, 'buyNowProductDetails']); //done
+        Route::get('/cart-products', [UserCheckoutController::class, 'getAllCartProducts']);
+        Route::post('/add-delivery-address', [UserCheckoutController::class, 'addDeliveryAddress']);
+        Route::post('/checkout-products', [UserCheckoutController::class, 'checkOutProducts']);
+        Route::post('/buy-now-product-details', [UserCheckoutController::class, 'buyNowProductDetails']);
         Route::post('/order-create', [UserOrderController::class, 'orderCreate']);
         Route::get('/order-status', [UserOrderController::class, 'orderStatus']);
+        Route::get('/order-history', [UserOrderController::class, 'orderHistory']);
 
         // Wishlist
         Route::get('/wishlist', [UserWishlistController::class, 'getWishlist']);
         Route::post('/store-wishlist', [UserWishlistController::class, 'storeWishlist']);
         Route::delete('/remove-wishlist', [UserWishlistController::class, 'removeWishlist']);
 
-        // Payment
-        Route::post('payment/initiate', [UserPaymentController::class, 'initiatePayment']);
-        Route::post('payment/confirm', [UserPaymentController::class, 'confirmPayment']);
-        Route::post('payment/stripe/cancel', [UserPaymentController::class, 'stripeCancel']);
-        Route::post('payment/stripe/success', [UserPaymentController::class, 'stripeSuccess']);
-        Route::get('payment/paypal/success', [UserPaymentController::class, 'paypalSuccess'])->name('paypal.success');
-        Route::get('payment/paypal/cancel', [UserPaymentController::class, 'paypalCancel'])->name('paypal.cancel');
+        // Saved Addresses
+        Route::get('/addresses', [UserAddressController::class, 'index']);
+        Route::post('/addresses', [UserAddressController::class, 'store']);
+        Route::put('/addresses/{id}', [UserAddressController::class, 'update']);
+        Route::delete('/addresses/{id}', [UserAddressController::class, 'destroy']);
+
+        // Notifications
+        Route::get('/notifications', [UserNotificationController::class, 'index']);
+        Route::get('/notifications/unread-count', [UserNotificationController::class, 'unreadCount']);
+        Route::post('/notifications/mark-read', [UserNotificationController::class, 'markAsRead']);
+        Route::post('/notifications/mark-all-read', [UserNotificationController::class, 'markAllAsRead']);
+
+        // Payment — commented out: client requirement is payment handled outside the app
+        // Kept for future use if in-app payment is needed
+        // Route::post('payment/initiate', [UserPaymentController::class, 'initiatePayment']);
+        // Route::post('payment/confirm', [UserPaymentController::class, 'confirmPayment']);
+        // Route::post('payment/stripe/cancel', [UserPaymentController::class, 'stripeCancel']);
+        // Route::post('payment/stripe/success', [UserPaymentController::class, 'stripeSuccess']);
+        // Route::get('payment/paypal/success', [UserPaymentController::class, 'paypalSuccess'])->name('paypal.success');
+        // Route::get('payment/paypal/cancel', [UserPaymentController::class, 'paypalCancel'])->name('paypal.cancel');
 
         // Boosted Products (User View)
         Route::get('/boosted-products/slider', [BoostedProductsController::class, 'getBoostedProductsSlider']);
@@ -182,22 +204,24 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // ───────────── Chatify Routes ─────────────
-    Route::post('/sendMessage', [MessagesController::class, 'send'])->name('api.send.message');
-    Route::post('/chat/auth', [MessagesController::class, 'pusherAuth'])->name('api.pusher.auth');
-    Route::post('/idInfo', [MessagesController::class, 'idFetchData'])->name('api.idInfo');
-    Route::post('/fetchMessages', [MessagesController::class, 'fetch'])->name('api.fetch.messages');
-    Route::get('/download/{fileName}', [MessagesController::class, 'download'])->name('api.download');
-    Route::post('/makeSeen', [MessagesController::class, 'seen'])->name('api.messages.seen');
-    Route::get('/getContacts', [MessagesController::class, 'getContacts'])->name('api.contacts.get');
-    Route::post('/star', [MessagesController::class, 'favorite'])->name('api.star');
-    Route::post('/favorites', [MessagesController::class, 'getFavorites'])->name('api.favorites');
-    Route::get('/search', [MessagesController::class, 'search'])->name('api.search');
-    Route::post('/shared', [MessagesController::class, 'sharedPhotos'])->name('api.shared');
-    Route::post('/deleteConversation', [MessagesController::class, 'deleteConversation'])->name('api.conversation.delete');
-    Route::post('/updateSettings', [MessagesController::class, 'updateSettings'])->name('api.avatar.update');
-    Route::post('/setActiveStatus', [MessagesController::class, 'setActiveStatus'])->name('api.activeStatus.set');
+    // Commented out: pending client decision — chat inside or outside app
+    // Uncomment when chat feature is confirmed for in-app use
+    // Route::post('/sendMessage', [MessagesController::class, 'send'])->name('api.send.message');
+    // Route::post('/chat/auth', [MessagesController::class, 'pusherAuth'])->name('api.pusher.auth');
+    // Route::post('/idInfo', [MessagesController::class, 'idFetchData'])->name('api.idInfo');
+    // Route::post('/fetchMessages', [MessagesController::class, 'fetch'])->name('api.fetch.messages');
+    // Route::get('/download/{fileName}', [MessagesController::class, 'download'])->name('api.download');
+    // Route::post('/makeSeen', [MessagesController::class, 'seen'])->name('api.messages.seen');
+    // Route::get('/getContacts', [MessagesController::class, 'getContacts'])->name('api.contacts.get');
+    // Route::post('/star', [MessagesController::class, 'favorite'])->name('api.star');
+    // Route::post('/favorites', [MessagesController::class, 'getFavorites'])->name('api.favorites');
+    // Route::get('/search', [MessagesController::class, 'search'])->name('api.search');
+    // Route::post('/shared', [MessagesController::class, 'sharedPhotos'])->name('api.shared');
+    // Route::post('/deleteConversation', [MessagesController::class, 'deleteConversation'])->name('api.conversation.delete');
+    // Route::post('/updateSettings', [MessagesController::class, 'updateSettings'])->name('api.avatar.update');
+    // Route::post('/setActiveStatus', [MessagesController::class, 'setActiveStatus'])->name('api.activeStatus.set');
 
     // ───────────── Logout ─────────
-    Route::post('/logout', [AuthController::class, 'logout']); // ✅ Done
+    Route::post('/logout', [AuthController::class, 'logout']);
 
 });

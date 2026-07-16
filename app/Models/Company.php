@@ -6,10 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model
 {
-    //
-    // public function products(){
-    //     return $this->hasMany(Product::class);
-    // }
+    protected $fillable = ['user_id', 'category_id', 'sub_category_id', 'company_name', 'description', 'company_image', 'status'];
 
 
     public function productCategories()

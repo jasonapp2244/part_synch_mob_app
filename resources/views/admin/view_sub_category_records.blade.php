@@ -1,23 +1,42 @@
 @extends('layouts.admin')
 
 @section('content')
-    <!--start page wrapper -->
     <div class="page-wrapper">
         <div class="page-content">
-            <!--breadcrumb-->
             <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
                 <div class="breadcrumb-title pe-3">Tables</div>
                 <div class="ps-3">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0 p-0">
-                            <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
-                            </li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
                             <li class="breadcrumb-item active" aria-current="page">Sub Category Table</li>
                         </ol>
                     </nav>
                 </div>
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubCategoryModal">
+                        <i class="bx bx-plus"></i> Add Sub Category
+                    </button>
+                </div>
             </div>
-            <!--end breadcrumb-->
+
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
             <h6 class="mb-0 text-uppercase">Sub Category Records</h6>
             <hr />
@@ -42,17 +61,20 @@
                                     <td>{{ $subCategory->sub_category_name ?? 'N/A' }}</td>
                                     <td>{{ $subCategory->category->name ?? 'N/A' }}</td>
                                     <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox"
-                                                {{ $subCategory->status === 'active' ? 'checked' : '' }}
-                                                style="background-color: #a1a1a1;" disabled>
-                                            <label class="form-check-label">{{ ucfirst($subCategory->status ?? 'inactive') }}</label>
-                                        </div>
+                                        <form action="{{ route('sub.category.toggle.status', $subCategory->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm {{ $subCategory->status === 'active' ? 'btn-success' : 'btn-secondary' }}">
+                                                {{ ucfirst($subCategory->status ?? 'inactive') }}
+                                            </button>
+                                        </form>
                                     </td>
                                     <td>{{ $subCategory->created_at ? $subCategory->created_at->format('d M Y') : 'N/A' }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSubCategoryModal{{ $subCategory->id }}">
+                                            <i class="bx bx-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteSubCategoryModal{{ $subCategory->id }}">
+                                            <i class="bx bx-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -68,5 +90,126 @@
             </div>
         </div>
     </div>
-    <!--end page wrapper -->
+
+    <!-- Add Sub Category Modal -->
+    <div class="modal fade" id="addSubCategoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('sub.category.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Sub Category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Parent Category <span class="text-danger">*</span></label>
+                            <select class="form-select" name="category_id" required>
+                                <option value="">Select Category</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sub Category Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="sub_category_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Image</label>
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit & Delete Modals -->
+    @foreach($subCategories as $subCategory)
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editSubCategoryModal{{ $subCategory->id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('sub.category.update', $subCategory->id) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Sub Category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Parent Category <span class="text-danger">*</span></label>
+                            <select class="form-select" name="category_id" required>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ $subCategory->category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sub Category Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="sub_category_name" value="{{ $subCategory->sub_category_name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Image</label>
+                            @if($subCategory->image)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $subCategory->image) }}" alt="" width="60" class="rounded">
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" name="image" accept="image/*">
+                            <small class="text-muted">Leave empty to keep current image</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="active" {{ $subCategory->status === 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ $subCategory->status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteSubCategoryModal{{ $subCategory->id }}" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <form action="{{ route('sub.category.destroy', $subCategory->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Sub Category</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete <strong>{{ $subCategory->sub_category_name }}</strong>?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endforeach
 @endsection

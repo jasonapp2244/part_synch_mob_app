@@ -1,23 +1,26 @@
 @extends('layouts.admin')
 
 @section('content')
-    <!--start page wrapper -->
     <div class="page-wrapper">
         <div class="page-content">
-            <!--breadcrumb-->
             <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
                 <div class="breadcrumb-title pe-3">Tables</div>
                 <div class="ps-3">
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0 p-0">
-                            <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
-                            </li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}"><i class="bx bx-home-alt"></i></a></li>
                             <li class="breadcrumb-item active" aria-current="page">Featured Table</li>
                         </ol>
                     </nav>
                 </div>
             </div>
-            <!--end breadcrumb-->
+
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
             <h6 class="mb-0 text-uppercase">Featured Products</h6>
             <hr />
@@ -31,7 +34,7 @@
                                     <th>Product Name</th>
                                     <th>Vendor</th>
                                     <th>Price</th>
-                                    <th>Status</th>
+                                    <th>Stock</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -43,17 +46,19 @@
                                     <td>{{ $product->user ? $product->user->first_name . ' ' . $product->user->last_name : 'N/A' }}</td>
                                     <td>${{ number_format($product->price ?? 0, 2) }}</td>
                                     <td>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox"
-                                                {{ $product->is_active ? 'checked' : '' }}
-                                                style="background-color: #a1a1a1;" disabled>
-                                            <label class="form-check-label">{{ $product->is_active ? 'Active' : 'Inactive' }}</label>
-                                        </div>
+                                        @if(($product->stock_quantity ?? 0) <= 0)
+                                            <span class="badge bg-danger">Out of Stock</span>
+                                        @else
+                                            <span class="badge bg-success">{{ $product->stock_quantity }}</span>
+                                        @endif
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-outline-secondary">
-                                            <i class="bx bx-show me-0"></i>
-                                        </button>
+                                        <form action="{{ route('featured.toggle', $product->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bx bx-x"></i> Remove Featured
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                                 @empty
@@ -68,5 +73,4 @@
             </div>
         </div>
     </div>
-    <!--end page wrapper -->
 @endsection

@@ -2,7 +2,7 @@
 <div class="sidebar-wrapper" data-simplebar="true">
     <div class="sidebar-header">
         <div>
-            {{-- <img src="     assets/images/logo-icon.png" class="logo-icon" alt="logo icon"> --}}
+            {{-- <img src="assets/images/logo-icon.png" class="logo-icon" alt="logo icon"> --}}
         </div>
         <div>
             <h4 class="logo-text">Part Synch</h4>
@@ -26,7 +26,7 @@
             <div class="menu-title">Vendors</div>
         </a>
         <ul>
-            <li><a href="{{ route('vendor.records') }}"><i class='bx bx-radio-circle'></i>View Vendors</a></li>
+            <li><a href="{{ route('vendor.records') }}"><i class='bx bx-radio-circle'></i>Manage Vendors</a></li>
         </ul>
     </li>
 
@@ -36,17 +36,7 @@
             <div class="menu-title">Users</div>
         </a>
         <ul>
-            <li><a href="{{ route('user.records') }}"><i class='bx bx-radio-circle'></i>View Users</a></li>
-        </ul>
-    </li>
-
-    <li>
-        <a href="javascript:;" class="has-arrow">
-            <div class="parent-icon"><i class='bx bx-star'></i></div>
-            <div class="menu-title">Featured</div>
-        </a>
-        <ul>
-            <li><a href="{{ route('featured.records') }}"><i class='bx bx-radio-circle'></i>View Featured</a></li>
+            <li><a href="{{ route('user.records') }}"><i class='bx bx-radio-circle'></i>Manage Users</a></li>
         </ul>
     </li>
 
@@ -56,17 +46,8 @@
             <div class="menu-title">Category</div>
         </a>
         <ul>
-            <li><a href="{{ route('category.records') }}"><i class='bx bx-radio-circle'></i>View Category</a></li>
-        </ul>
-    </li>
-
-    <li>
-        <a href="javascript:;" class="has-arrow">
-            <div class="parent-icon"><i class='bx bx-subdirectory-right'></i></div>
-            <div class="menu-title">Sub Category</div>
-        </a>
-        <ul>
-            <li><a href="{{ route('sub.category.records') }}"><i class='bx bx-radio-circle'></i>View Sub Category</a></li>
+            <li><a href="{{ route('category.records') }}"><i class='bx bx-radio-circle'></i>Manage Categories</a></li>
+            <li><a href="{{ route('sub.category.records') }}"><i class='bx bx-radio-circle'></i>Manage Sub Categories</a></li>
         </ul>
     </li>
 
@@ -76,17 +57,7 @@
             <div class="menu-title">Company</div>
         </a>
         <ul>
-            <li><a href="{{ route('company.records') }}"><i class='bx bx-radio-circle'></i>View Company</a></li>
-        </ul>
-    </li>
-
-    <li>
-        <a href="javascript:;" class="has-arrow">
-            <div class="parent-icon"><i class='bx bx-wallet'></i></div>
-            <div class="menu-title">Earning</div>
-        </a>
-        <ul>
-            <li><a href="{{ route('earning.records') }}"><i class='bx bx-radio-circle'></i>View Earning</a></li>
+            <li><a href="{{ route('company.records') }}"><i class='bx bx-radio-circle'></i>Manage Companies</a></li>
         </ul>
     </li>
 
@@ -96,8 +67,36 @@
             <div class="menu-title">Products</div>
         </a>
         <ul>
-            <li><a href="{{ route('product.records') }}"><i class='bx bx-radio-circle'></i>View Products</a></li>
+            <li><a href="{{ route('product.records') }}"><i class='bx bx-radio-circle'></i>Manage Products</a></li>
+            <li><a href="{{ route('featured.records') }}"><i class='bx bx-radio-circle'></i>Featured Products</a></li>
         </ul>
+    </li>
+
+    <li>
+        <a href="javascript:;" class="has-arrow">
+            <div class="parent-icon"><i class='bx bx-wallet'></i></div>
+            <div class="menu-title">Orders & Earnings</div>
+        </a>
+        <ul>
+            <li><a href="{{ route('earning.records') }}"><i class='bx bx-radio-circle'></i>Manage Orders</a></li>
+        </ul>
+    </li>
+
+    <li>
+        <a href="javascript:;" class="has-arrow">
+            <div class="parent-icon"><i class='bx bx-rocket'></i></div>
+            <div class="menu-title">Boost</div>
+        </a>
+        <ul>
+            <li><a href="{{ route('boost.packages') }}"><i class='bx bx-radio-circle'></i>Manage Packages</a></li>
+        </ul>
+    </li>
+
+    <li>
+        <a href="{{ route('admin.settings') }}">
+            <div class="parent-icon"><i class='bx bx-cog'></i></div>
+            <div class="menu-title">Settings</div>
+        </a>
     </li>
 
 </ul>

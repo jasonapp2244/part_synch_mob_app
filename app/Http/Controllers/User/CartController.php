@@ -55,8 +55,16 @@ class CartController extends Controller
                 $newQty = $cartItem->quantity + $request->quantity;
 
                 if ($newQty <= 0) {
+                    DeliveryAddress::where('cart_id', $cartItem->id)->delete();
                     $cartItem->delete();
                     return response()->json(['message' => 'Item removed from cart (quantity zero)'], 200);
+                }
+
+                if ($newQty > $product->stock_quantity) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Cannot add more. You already have ' . $cartItem->quantity . ' in cart. Only ' . $product->stock_quantity . ' available in stock.',
+                    ], 400);
                 }
 
                 $newTotalPrice = $newQty * $product->price;
