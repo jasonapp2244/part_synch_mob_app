@@ -83,6 +83,14 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Accessor for Chatify compatibility — Chatify expects a 'name' attribute.
+     */
+    public function getNameAttribute()
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
+    }
+
     protected function product()
     {
         return $this->hasMany(Product::class);

@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
-use Chatify\Http\Controllers\Api\MessagesController;
+use App\Http\Controllers\Chat\MessagesController;
 use App\Http\Controllers\Admin\BoostPackageController;
 
 // Vendor Controllers
@@ -203,23 +203,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
     });
 
-    // ───────────── Chatify Routes ─────────────
-    // Commented out: pending client decision — chat inside or outside app
-    // Uncomment when chat feature is confirmed for in-app use
-    // Route::post('/sendMessage', [MessagesController::class, 'send'])->name('api.send.message');
-    // Route::post('/chat/auth', [MessagesController::class, 'pusherAuth'])->name('api.pusher.auth');
-    // Route::post('/idInfo', [MessagesController::class, 'idFetchData'])->name('api.idInfo');
-    // Route::post('/fetchMessages', [MessagesController::class, 'fetch'])->name('api.fetch.messages');
-    // Route::get('/download/{fileName}', [MessagesController::class, 'download'])->name('api.download');
-    // Route::post('/makeSeen', [MessagesController::class, 'seen'])->name('api.messages.seen');
-    // Route::get('/getContacts', [MessagesController::class, 'getContacts'])->name('api.contacts.get');
-    // Route::post('/star', [MessagesController::class, 'favorite'])->name('api.star');
-    // Route::post('/favorites', [MessagesController::class, 'getFavorites'])->name('api.favorites');
-    // Route::get('/search', [MessagesController::class, 'search'])->name('api.search');
-    // Route::post('/shared', [MessagesController::class, 'sharedPhotos'])->name('api.shared');
-    // Route::post('/deleteConversation', [MessagesController::class, 'deleteConversation'])->name('api.conversation.delete');
-    // Route::post('/updateSettings', [MessagesController::class, 'updateSettings'])->name('api.avatar.update');
-    // Route::post('/setActiveStatus', [MessagesController::class, 'setActiveStatus'])->name('api.activeStatus.set');
+    // ───────────── Chatify Routes (User & Vendor Chat) ─────────────
+    Route::post('/sendMessage', [MessagesController::class, 'send'])->name('api.send.message');
+    Route::post('/chat/auth', [MessagesController::class, 'pusherAuth'])->name('api.pusher.auth');
+    Route::post('/idInfo', [MessagesController::class, 'idFetchData'])->name('api.idInfo');
+    Route::post('/fetchMessages', [MessagesController::class, 'fetch'])->name('api.fetch.messages');
+    Route::get('/download/{fileName}', [MessagesController::class, 'download'])->name('api.download');
+    Route::post('/makeSeen', [MessagesController::class, 'seen'])->name('api.messages.seen');
+    Route::get('/getContacts', [MessagesController::class, 'getContacts'])->name('api.contacts.get');
+    Route::post('/star', [MessagesController::class, 'favorite'])->name('api.star');
+    Route::post('/favorites', [MessagesController::class, 'getFavorites'])->name('api.favorites');
+    Route::get('/search', [MessagesController::class, 'search'])->name('api.search');
+    Route::post('/shared', [MessagesController::class, 'sharedPhotos'])->name('api.shared');
+    Route::post('/deleteConversation', [MessagesController::class, 'deleteConversation'])->name('api.conversation.delete');
+    Route::post('/updateSettings', [MessagesController::class, 'updateSettings'])->name('api.avatar.update');
+    Route::post('/setActiveStatus', [MessagesController::class, 'setActiveStatus'])->name('api.activeStatus.set');
 
     // ───────────── Logout ─────────
     Route::post('/logout', [AuthController::class, 'logout']);
