@@ -45,22 +45,31 @@ Route::get('test', function () {
     return response()->json(['status' => 'testings']);
 });
 
-Route::get('cache-clear', function() {
+// Maintenance helper. This runs artisan cache commands, so it must never be
+// public — admins only (role_id = 1), behind Sanctum.
+Route::middleware(['auth:sanctum', 'role:1'])->get('cache-clear', function () {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
     Artisan::call('config:cache');
     Artisan::call('view:clear');
-    return "Cleared!";
+
+    return response()->json(['status' => true, 'message' => 'Caches cleared.']);
 });
 // ────────────────────────────────
 // Public Auth Routes
+//
+// The credential/OTP endpoints carry the tighter 'auth' limiter (defined in
+// AppServiceProvider): 5/min per IP+email and 20/min per IP, so the blanket
+// 60/min API limit cannot be used to brute force a password or an OTP.
 // ────────────────────────────────
-Route::post('/signup', [AuthController::class, 'signup']);
-Route::post('/mail_testing', [AuthController::class, 'mailTesting']);
-Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
-Route::post('/otp-verification', [AuthController::class, 'otpVerification']);
-Route::post('/signin', [AuthController::class, 'signin']);
-Route::post('/forgot_password', [AuthController::class, 'forgotPassword']);
+Route::middleware('throttle:auth')->group(function () {
+    Route::post('/signup', [AuthController::class, 'signup']);
+    Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+    Route::post('/otp-verification', [AuthController::class, 'otpVerification']);
+    Route::post('/signin', [AuthController::class, 'signin']);
+    Route::post('/forgot_password', [AuthController::class, 'forgotPassword']);
+});
+
 Route::get('/vendor_type', [VendorTypeController::class, 'vendorType']);
 
 // ────────────────────────────────
