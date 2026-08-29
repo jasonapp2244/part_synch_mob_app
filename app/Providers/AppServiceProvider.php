@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\Report;
+use App\Models\Review;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +28,36 @@ class AppServiceProvider extends ServiceProvider
      public function boot(): void
     {
         $this->configureRateLimiting();
+        $this->shareModerationCounts();
+    }
+
+    /**
+     * Pending-moderation badge counts for the admin sidebar.
+     *
+     * Guarded by a Schema check and a try/catch so that a machine which has
+     * not run the new migrations yet — or has no database configured, as when
+     * running `artisan` offline — still renders the panel instead of throwing
+     * on every page.
+     */
+    protected function shareModerationCounts(): void
+    {
+        View::composer('layouts.partials.sidebar', function ($view) {
+            $counts = ['pendingReportCount' => 0, 'pendingReviewCount' => 0];
+
+            try {
+                if (Schema::hasTable('reports')) {
+                    $counts['pendingReportCount'] = Report::where('status', 'pending')->count();
+                }
+
+                if (Schema::hasTable('reviews')) {
+                    $counts['pendingReviewCount'] = Review::where('status', 'pending')->count();
+                }
+            } catch (\Throwable $e) {
+                // Leave both at zero — a sidebar badge is not worth a 500.
+            }
+
+            $view->with($counts);
+        });
     }
 
     /**

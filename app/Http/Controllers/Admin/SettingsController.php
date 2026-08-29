@@ -30,6 +30,30 @@ class SettingsController extends Controller
                 'tax_rate' => '0',
                 'shipping_default' => '0',
             ],
+            // Served to the mobile app by /api/app-config on launch. The
+            // minimum version drives the force-update prompt, so old builds
+            // can be retired instead of failing against a changed API.
+            'mobile' => [
+                'min_app_version_android' => '1.0.0',
+                'latest_app_version_android' => '1.0.0',
+                'min_app_version_ios' => '1.0.0',
+                'latest_app_version_ios' => '1.0.0',
+                'play_store_url' => '',
+                'app_store_url' => '',
+                'force_update_message' => 'A newer version of Part Synch is required to continue.',
+                'maintenance_mode' => '0',
+                'maintenance_message' => '',
+            ],
+            // Both stores require a reachable privacy policy, and Apple wants
+            // terms linked wherever an account can be created.
+            'legal' => [
+                'support_email' => '',
+                'support_phone' => '',
+                'privacy_policy_url' => '',
+                'privacy_policy_content' => '',
+                'terms_url' => '',
+                'terms_content' => '',
+            ],
         ];
 
         // Merge defaults with DB values
@@ -45,6 +69,23 @@ class SettingsController extends Controller
 
     public function update(Request $request)
     {
+        $request->validate([
+            'site_email' => 'nullable|email|max:255',
+            'support_email' => 'nullable|email|max:255',
+            'vendor_commission_rate' => 'nullable|numeric|min:0|max:100',
+            'tax_rate' => 'nullable|numeric|min:0|max:100',
+            'min_order_amount' => 'nullable|numeric|min:0',
+            'shipping_default' => 'nullable|numeric|min:0',
+            'privacy_policy_url' => 'nullable|url|max:500',
+            'terms_url' => 'nullable|url|max:500',
+            'play_store_url' => 'nullable|url|max:500',
+            'app_store_url' => 'nullable|url|max:500',
+            'min_app_version_android' => ['nullable', 'regex:/^\d+(\.\d+){0,3}$/'],
+            'latest_app_version_android' => ['nullable', 'regex:/^\d+(\.\d+){0,3}$/'],
+            'min_app_version_ios' => ['nullable', 'regex:/^\d+(\.\d+){0,3}$/'],
+            'latest_app_version_ios' => ['nullable', 'regex:/^\d+(\.\d+){0,3}$/'],
+        ]);
+
         $settingKeys = [
             'site_name' => 'general',
             'site_email' => 'general',
@@ -56,6 +97,20 @@ class SettingsController extends Controller
             'min_order_amount' => 'orders',
             'tax_rate' => 'orders',
             'shipping_default' => 'orders',
+            'min_app_version_android' => 'mobile',
+            'latest_app_version_android' => 'mobile',
+            'min_app_version_ios' => 'mobile',
+            'latest_app_version_ios' => 'mobile',
+            'play_store_url' => 'mobile',
+            'app_store_url' => 'mobile',
+            'force_update_message' => 'mobile',
+            'maintenance_message' => 'mobile',
+            'support_email' => 'legal',
+            'support_phone' => 'legal',
+            'privacy_policy_url' => 'legal',
+            'privacy_policy_content' => 'legal',
+            'terms_url' => 'legal',
+            'terms_content' => 'legal',
         ];
 
         foreach ($settingKeys as $key => $group) {
@@ -63,6 +118,10 @@ class SettingsController extends Controller
                 Setting::set($key, $request->input($key), $group);
             }
         }
+
+        // An unchecked checkbox is absent from the request, so it has to be
+        // written explicitly or maintenance mode could never be turned off.
+        Setting::set('maintenance_mode', $request->boolean('maintenance_mode') ? '1' : '0', 'mobile');
 
         return redirect()->route('admin.settings')->with('success', 'Settings updated successfully.');
     }

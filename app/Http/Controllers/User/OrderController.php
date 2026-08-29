@@ -96,15 +96,6 @@ class OrderController extends Controller
 
                 $orderItems[] = $orderItem;
 
-                // Create notificationx
-                Notification::create([
-                    'user_id' => $userId,
-                    'order_id' => $order->id,
-                    'email_subject' => 'Order Placed',
-                    'email_body' => "Your order {$orderNumber} has been placed.",
-                    'status' => 'sent',
-                ]);
-
                 // Mark cart item as inactive after order is placed
                 $cartItem->status = 'inactive';
                 $cartItem->save();
@@ -124,6 +115,27 @@ class OrderController extends Controller
                     $stock->save();
                 }
             }
+
+            // One notification per order, not per line item — this used to sit
+            // inside the item loop, so a three-item order produced three
+            // identical "Order Placed" notifications.
+            Notification::create([
+                'user_id' => $userId,
+                'order_id' => $order->id,
+                'email_subject' => 'Order Placed',
+                'email_body' => "Your order {$orderNumber} has been placed.",
+                'status' => 'sent',
+            ]);
+
+            // The vendor was never notified in-app, only by email, so nothing
+            // showed up in their notifications list when an order arrived.
+            Notification::create([
+                'vendor_id' => $order->vendor_id,
+                'order_id' => $order->id,
+                'email_subject' => 'New Order Received',
+                'email_body' => "You have received a new order {$orderNumber}.",
+                'status' => 'sent',
+            ]);
 
             // Fetch customer record for email
             // dd($orderItems->toArray());

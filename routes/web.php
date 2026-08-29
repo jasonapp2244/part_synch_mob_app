@@ -11,7 +11,9 @@ use App\Http\Controllers\Admin\{
     ProductController,
     EarningController,
     SettingsController,
-    BoostPackageController
+    BoostPackageController,
+    ReportController,
+    ReviewController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -89,6 +91,17 @@ Route::middleware('admin')->group(function () {
     Route::put('/boost-package/{id}', [BoostPackageController::class, 'update'])->name('boost.package.update');
     Route::post('/boost-package/{id}/toggle-status', [BoostPackageController::class, 'toggleStatus'])->name('boost.package.toggle.status');
     Route::delete('/boost-package/{id}', [BoostPackageController::class, 'destroy'])->name('boost.package.destroy');
+
+    // Moderation — reported content and product reviews.
+    // The reports queue is what App Store review looks for as proof that
+    // reported user generated content is acted on.
+    Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
+    Route::put('/report/{id}', [ReportController::class, 'update'])->name('admin.reports.update');
+    Route::post('/report/{id}/take-down', [ReportController::class, 'takeDown'])->name('admin.reports.takedown');
+
+    Route::get('/reviews', [ReviewController::class, 'index'])->name('admin.reviews');
+    Route::post('/review/{id}/status', [ReviewController::class, 'updateStatus'])->name('admin.reviews.status');
+    Route::delete('/review/{id}', [ReviewController::class, 'destroy'])->name('admin.reviews.destroy');
 
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings');

@@ -22,6 +22,13 @@
                 </div>
             @endif
 
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
             <form action="{{ route('admin.settings.update') }}" method="POST">
                 @csrf
 
@@ -108,6 +115,96 @@
                                     <span class="input-group-text">{{ $currentSettings['currency_symbol'] }}</span>
                                     <input type="number" class="form-control" name="shipping_default" value="{{ $currentSettings['shipping_default'] }}" step="0.01" min="0">
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile App Settings -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bx bx-mobile-alt"></i> Mobile App</h6>
+                        <small class="text-secondary">Served to the app by /api/app-config on launch.</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Minimum Android Version</label>
+                                <input type="text" class="form-control" name="min_app_version_android" value="{{ $currentSettings['min_app_version_android'] }}" placeholder="1.0.0">
+                                <small class="text-secondary">Older builds are forced to update.</small>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Latest Android Version</label>
+                                <input type="text" class="form-control" name="latest_app_version_android" value="{{ $currentSettings['latest_app_version_android'] }}" placeholder="1.0.0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Minimum iOS Version</label>
+                                <input type="text" class="form-control" name="min_app_version_ios" value="{{ $currentSettings['min_app_version_ios'] }}" placeholder="1.0.0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Latest iOS Version</label>
+                                <input type="text" class="form-control" name="latest_app_version_ios" value="{{ $currentSettings['latest_app_version_ios'] }}" placeholder="1.0.0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Play Store URL</label>
+                                <input type="url" class="form-control" name="play_store_url" value="{{ $currentSettings['play_store_url'] }}" placeholder="https://play.google.com/store/apps/details?id=...">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">App Store URL</label>
+                                <input type="url" class="form-control" name="app_store_url" value="{{ $currentSettings['app_store_url'] }}" placeholder="https://apps.apple.com/app/id...">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Force Update Message</label>
+                                <input type="text" class="form-control" name="force_update_message" value="{{ $currentSettings['force_update_message'] }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch mt-4">
+                                    <input class="form-check-input" type="checkbox" name="maintenance_mode" value="1" id="maintenanceMode" {{ $currentSettings['maintenance_mode'] ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="maintenanceMode">Maintenance Mode</label>
+                                </div>
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Maintenance Message</label>
+                                <input type="text" class="form-control" name="maintenance_message" value="{{ $currentSettings['maintenance_message'] }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legal & Support -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bx bx-shield"></i> Legal &amp; Support</h6>
+                        <small class="text-secondary">
+                            Required for App Store and Play Store submission. A reachable privacy policy is mandatory on both stores.
+                        </small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Support Email</label>
+                                <input type="email" class="form-control" name="support_email" value="{{ $currentSettings['support_email'] }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Support Phone</label>
+                                <input type="text" class="form-control" name="support_phone" value="{{ $currentSettings['support_phone'] }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Privacy Policy URL</label>
+                                <input type="url" class="form-control" name="privacy_policy_url" value="{{ $currentSettings['privacy_policy_url'] }}" placeholder="https://...">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Terms of Service URL</label>
+                                <input type="url" class="form-control" name="terms_url" value="{{ $currentSettings['terms_url'] }}" placeholder="https://...">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Privacy Policy Text</label>
+                                <textarea class="form-control" name="privacy_policy_content" rows="6">{{ $currentSettings['privacy_policy_content'] }}</textarea>
+                                <small class="text-secondary">Served by /api/legal/privacy-policy so the app can render it natively.</small>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Terms of Service Text</label>
+                                <textarea class="form-control" name="terms_content" rows="6">{{ $currentSettings['terms_content'] }}</textarea>
                             </div>
                         </div>
                     </div>

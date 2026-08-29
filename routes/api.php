@@ -5,6 +5,11 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AppConfigController;
+use App\Http\Controllers\DeviceTokenController;
+use App\Http\Controllers\SafetyController;
+use App\Http\Controllers\SupportController;
 use App\Http\Controllers\Chat\MessagesController;
 use App\Http\Controllers\Admin\BoostPackageController;
 
@@ -22,6 +27,7 @@ use App\Http\Controllers\Vendor\{
     ProductCategoryController as VendorProductCategoryController,
     OrderController as VendorOrderController,
     VendorBoostController,
+    NotificationController as VendorNotificationController,
 };
 
 // User Controllers
@@ -36,6 +42,7 @@ use App\Http\Controllers\User\{
     BoostedProductsController,
     NotificationController as UserNotificationController,
     AddressController as UserAddressController,
+    ReviewController as UserReviewController,
 };
 
 // ────────────────────────────────
@@ -73,6 +80,18 @@ Route::middleware('throttle:auth')->group(function () {
 Route::get('/vendor_type', [VendorTypeController::class, 'vendorType']);
 
 // ────────────────────────────────
+// App configuration & legal documents (public)
+//
+// The app calls /app-config on launch, before anyone is signed in, to learn
+// whether the build is still supported and where the privacy policy lives.
+// Both stores require a reachable privacy policy; Apple additionally requires
+// terms to be linked wherever an account can be created.
+// ────────────────────────────────
+Route::get('/app-config', [AppConfigController::class, 'config']);
+Route::get('/legal/privacy-policy', [AppConfigController::class, 'privacyPolicy']);
+Route::get('/legal/terms', [AppConfigController::class, 'terms']);
+
+// ────────────────────────────────
 // Protected Routes (Requires Sanctum Auth)
 Route::get('/admin/boost-packages', [BoostPackageController::class, 'index']);
 // ────────────────────────────────
@@ -84,6 +103,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reset_password', [AuthController::class, 'resetPassword']);
     Route::get('/profile', [UserController::class, 'viewProfile']);
     Route::post('/update_profile', [UserController::class, 'updateProfile']);
+
+    // ───────────── Account deletion ─────────────
+    // Mandatory for both stores: App Store guideline 5.1.1(v) and the Google
+    // Play data deletion policy require deleting an account from inside the
+    // app. Open to every signed-in role.
+    Route::get('/account/deletion-info', [AccountController::class, 'deletionInfo']);
+    Route::delete('/account', [AccountController::class, 'destroy']);
+
+    // ───────────── Trust & safety (App Store guideline 1.2) ─────────────
+    // The app carries user generated content (chat, listings, reviews), so it
+    // must ship reporting and blocking.
+    Route::get('/report-reasons', [SafetyController::class, 'reportReasons']);
+    Route::post('/report', [SafetyController::class, 'report']);
+    Route::get('/my-reports', [SafetyController::class, 'myReports']);
+    Route::post('/block-user', [SafetyController::class, 'block']);
+    Route::post('/unblock-user', [SafetyController::class, 'unblock']);
+    Route::get('/blocked-users', [SafetyController::class, 'blockedUsers']);
+
+    // ───────────── Push notification devices ─────────────
+    Route::post('/device-token', [DeviceTokenController::class, 'register']);
+    Route::delete('/device-token', [DeviceTokenController::class, 'unregister']);
+
+    // ───────────── Support ─────────────
+    Route::post('/support/contact', [SupportController::class, 'contact']);
+
+    // ───────────── Reviews (readable by any signed-in role) ─────────────
+    Route::get('/reviews/product/{productId}', [UserReviewController::class, 'productReviews']);
+    Route::get('/reviews/vendor/{vendorId}', [UserReviewController::class, 'vendorReviews']);
 
     // ───────────── Vendor APIs (role_id = 2 only) ─────────────
     Route::prefix('vendor')->middleware('role:2')->group(function () {
@@ -127,6 +174,13 @@ Route::middleware('auth:sanctum')->group(function () {
         // Order Management
         Route::get('/order-view', [VendorOrderController::class, 'orderView']);
         Route::post('/order-manage', [VendorOrderController::class, 'orderManage']);
+
+        // Notifications — the vendor half of the notifications table, which
+        // previously had no endpoint at all.
+        Route::get('/notifications', [VendorNotificationController::class, 'index']);
+        Route::get('/notifications/unread-count', [VendorNotificationController::class, 'unreadCount']);
+        Route::post('/notifications/mark-read', [VendorNotificationController::class, 'markAsRead']);
+        Route::post('/notifications/mark-all-read', [VendorNotificationController::class, 'markAllAsRead']);
 
         // Boost Management
         Route::prefix('boost')->group(function () {
@@ -190,6 +244,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/addresses', [UserAddressController::class, 'store']);
         Route::put('/addresses/{id}', [UserAddressController::class, 'update']);
         Route::delete('/addresses/{id}', [UserAddressController::class, 'destroy']);
+
+        // Reviews & ratings
+        Route::get('/reviews', [UserReviewController::class, 'index']);
+        Route::get('/reviews/pending', [UserReviewController::class, 'pending']);
+        Route::post('/reviews', [UserReviewController::class, 'store']);
+        Route::put('/reviews/{id}', [UserReviewController::class, 'update']);
+        Route::delete('/reviews/{id}', [UserReviewController::class, 'destroy']);
 
         // Notifications
         Route::get('/notifications', [UserNotificationController::class, 'index']);

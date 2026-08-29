@@ -21,6 +21,11 @@ class FeaturedController extends Controller
         $product->save();
 
         $status = $product->is_top ? 'featured' : 'unfeatured';
-        return redirect()->route('featured.records')->with('success', "Product {$status} successfully.");
+
+        // Return to whichever screen the toggle was pressed on. This used to
+        // always redirect to the Featured screen, so featuring a product from
+        // Manage Products bounced the admin out of the list they were working
+        // through.
+        return back()->with('success', "Product {$status} successfully.");
     }
 }

@@ -93,6 +93,31 @@
     </li>
 
     <li>
+        <a href="javascript:;" class="has-arrow">
+            <div class="parent-icon"><i class='bx bx-shield-quarter'></i></div>
+            <div class="menu-title">Moderation</div>
+        </a>
+        <ul>
+            <li>
+                <a href="{{ route('admin.reports') }}">
+                    <i class='bx bx-radio-circle'></i>Reported Content
+                    @if(($pendingReportCount ?? 0) > 0)
+                        <span class="badge bg-danger ms-1">{{ $pendingReportCount }}</span>
+                    @endif
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.reviews') }}">
+                    <i class='bx bx-radio-circle'></i>Product Reviews
+                    @if(($pendingReviewCount ?? 0) > 0)
+                        <span class="badge bg-warning ms-1">{{ $pendingReviewCount }}</span>
+                    @endif
+                </a>
+            </li>
+        </ul>
+    </li>
+
+    <li>
         <a href="{{ route('admin.settings') }}">
             <div class="parent-icon"><i class='bx bx-cog'></i></div>
             <div class="menu-title">Settings</div>
