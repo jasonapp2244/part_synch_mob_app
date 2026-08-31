@@ -72,6 +72,11 @@ class User extends Authenticatable
         'remember_token',
         'forgot_password_token',
         'reset_password_token',
+        // The pending verification code. Several endpoints return the User
+        // model directly (signup, otp-verification, signin), and signup was
+        // therefore handing the caller the very code that proves ownership of
+        // the address — it belongs in the user's inbox and nowhere else.
+        'otp',
     ];
 
     /**

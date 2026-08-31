@@ -24,17 +24,18 @@ class ProductController extends Controller
             ->orderBy('id', 'desc')
             ->paginate();
 
-        if ($products->isEmpty()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No products found.',
-            ], 400);
-        }
-
+        // A vendor with no products is a normal, successful result — it is what
+        // every new vendor sees. This used to answer 400 / status:false, which
+        // the app maps onto its network-failure screen: the first thing a vendor
+        // saw after signing up was "We're unable to process your request. Please
+        // try again later." and a Retry button that could never succeed.
+        // Returning the empty paginator lets the client render an empty state.
         return response()->json([
-            'status' => true,
-            'message' => 'Products fetched successfully.',
-            'data' => $products,
+            'status'  => true,
+            'message' => $products->isEmpty()
+                ? 'No products found.'
+                : 'Products fetched successfully.',
+            'data'    => $products,
         ]);
     }
 
