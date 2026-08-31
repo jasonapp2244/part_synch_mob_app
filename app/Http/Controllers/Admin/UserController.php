@@ -13,4 +13,21 @@ class UserController extends Controller
         $users = User::where('role_id', 3)->get();
         return view('admin.view_users_records', compact('users'));
     }
+
+    public function toggleStatus($id)
+    {
+        $user = User::where('role_id', 3)->findOrFail($id);
+        $user->status = $user->status === 'active' ? 'inactive' : 'active';
+        $user->save();
+
+        return redirect()->route('user.records')->with('success', 'User status updated to ' . $user->status . '.');
+    }
+
+    public function destroy($id)
+    {
+        $user = User::where('role_id', 3)->findOrFail($id);
+        $user->delete();
+
+        return redirect()->route('user.records')->with('success', 'User deleted successfully.');
+    }
 }

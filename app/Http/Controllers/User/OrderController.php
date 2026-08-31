@@ -96,15 +96,6 @@ class OrderController extends Controller
 
                 $orderItems[] = $orderItem;
 
-                // Create notificationx
-                Notification::create([
-                    'user_id' => $userId,
-                    'order_id' => $order->id,
-                    'email_subject' => 'Order Placed',
-                    'email_body' => "Your order {$orderNumber} has been placed.",
-                    'status' => 'sent',
-                ]);
-
                 // Mark cart item as inactive after order is placed
                 $cartItem->status = 'inactive';
                 $cartItem->save();
@@ -125,6 +116,27 @@ class OrderController extends Controller
                 }
             }
 
+            // One notification per order, not per line item — this used to sit
+            // inside the item loop, so a three-item order produced three
+            // identical "Order Placed" notifications.
+            Notification::create([
+                'user_id' => $userId,
+                'order_id' => $order->id,
+                'email_subject' => 'Order Placed',
+                'email_body' => "Your order {$orderNumber} has been placed.",
+                'status' => 'sent',
+            ]);
+
+            // The vendor was never notified in-app, only by email, so nothing
+            // showed up in their notifications list when an order arrived.
+            Notification::create([
+                'vendor_id' => $order->vendor_id,
+                'order_id' => $order->id,
+                'email_subject' => 'New Order Received',
+                'email_body' => "You have received a new order {$orderNumber}.",
+                'status' => 'sent',
+            ]);
+
             // Fetch customer record for email
             // dd($orderItems->toArray());
             $userRecord = User::find($userId);
@@ -136,6 +148,55 @@ class OrderController extends Controller
         }
 
         return response()->json(['message' => 'Orders placed and emails sent successfully.']);
+    }
+
+    public function orderHistory(Request $request)
+    {
+        $userId = auth()->id();
+
+        $orders = Order::with(['orderItems.product.productImages', 'deliveryAddress'])
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->paginate(15);
+
+        $data = $orders->getCollection()->map(function ($order) {
+            return [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'status' => $order->order_status,
+                'total' => $order->orderItems->sum('total_price'),
+                'items_count' => $order->orderItems->count(),
+                'delivery_date' => $order->delivery_date,
+                'created_at' => $order->created_at?->format('d M Y H:i'),
+                'items' => $order->orderItems->map(function ($item) {
+                    return [
+                        'product_name' => $item->product->name ?? 'Deleted Product',
+                        'quantity' => $item->quantity,
+                        'price' => $item->price,
+                        'total_price' => $item->total_price,
+                        'image' => $item->product?->productImages?->first()?->image_url,
+                    ];
+                }),
+                'delivery_address' => $order->deliveryAddress ? [
+                    'full_name' => $order->deliveryAddress->full_name,
+                    'address' => $order->deliveryAddress->address_line1,
+                    'city' => $order->deliveryAddress->city,
+                    'state' => $order->deliveryAddress->state,
+                    'country' => $order->deliveryAddress->country,
+                ] : null,
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Order history fetched.',
+            'data' => $data,
+            'pagination' => [
+                'current_page' => $orders->currentPage(),
+                'last_page' => $orders->lastPage(),
+                'total' => $orders->total(),
+            ],
+        ]);
     }
 
     public function orderStatus(Request $request)

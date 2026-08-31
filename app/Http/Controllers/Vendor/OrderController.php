@@ -60,6 +60,22 @@ class OrderController extends Controller
         ], 200);
     }
 
+    /**
+     * Statuses a vendor may move an order into, keyed by the status the order
+     * is currently in. Fulfilment runs forward only; 'cancel' stays available
+     * until the parcel is handed over, and the three end states are terminal.
+     */
+    private const STATUS_FLOW = [
+        'pending'      => ['accept', 'cancel'],
+        'accept'       => ['payment', 'order_packed', 'cancel'],
+        'payment'      => ['order_packed', 'cancel'],
+        'order_packed' => ['shipping', 'cancel'],
+        'shipping'     => ['completed'],
+        'completed'    => [],
+        'delivered'    => [],
+        'cancel'       => [],
+    ];
+
     public function orderManage(Request $request)
     {
         $validStatuses = ['accept', 'cancel', 'payment', 'order_packed', 'shipping', 'completed'];
@@ -73,13 +89,32 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
+            // Scope to the signed-in vendor: an order id alone must never be
+            // enough to manage somebody else's order.
             $order = Order::where('id', $request->order_id)
-                ->where('order_status', 'pending') // Adjust if needed
+                ->where('vendor_id', auth()->id())
                 ->first();
-            // dd($order->toArray());
+
             if (!$order) {
-                return response()->json(['message' => 'Order not found or not in pending status'], 400);
+                DB::rollBack();
+                return response()->json(['message' => 'Order not found'], 404);
             }
+
+            $current = $order->order_status;
+            $allowed = self::STATUS_FLOW[$current] ?? [];
+
+            if (!in_array($request->order_status, $allowed, true)) {
+                DB::rollBack();
+
+                return response()->json([
+                    'message' => $allowed
+                        ? "An order in '{$current}' cannot be moved to '{$request->order_status}'."
+                        : "This order is '{$current}' and can no longer be changed.",
+                    'current_status' => $current,
+                    'allowed_statuses' => $allowed,
+                ], 422);
+            }
+
             // Set new status
             $order->order_status = $request->order_status;
 

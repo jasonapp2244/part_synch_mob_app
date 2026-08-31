@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -57,6 +58,8 @@ class User extends Authenticatable
         'forgot_password_token',
         'reset_password_token',
         'status',
+        'deletion_reason',
+        'anonymised_at',
     ];
 
 
@@ -84,7 +87,16 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
             'otp_expires_at' => 'datetime',
+            'anonymised_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Accessor for Chatify compatibility — Chatify expects a 'name' attribute.
+     */
+    public function getNameAttribute()
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
     }
 
     protected function product()
@@ -127,6 +139,22 @@ public function products()
 public function company()
 {
     return $this->hasOne(\App\Models\Company::class, 'user_id');
+}
+
+public function deviceTokens()
+{
+    return $this->hasMany(\App\Models\DeviceToken::class);
+}
+
+public function reviews()
+{
+    return $this->hasMany(\App\Models\Review::class, 'user_id');
+}
+
+/** Users this account has blocked. */
+public function blocks()
+{
+    return $this->hasMany(\App\Models\UserBlock::class, 'blocker_id');
 }
 
 

@@ -68,25 +68,22 @@ class ProductController extends Controller
             ], 403);
         }
         $products = Product::with('productImages')
-            ->where('user_id',  $user->id)
+            ->where('user_id', $user->id)
             ->orderBy('id', 'desc')
             ->paginate();
 
-        // Fetch products using user ID or fallback to provided ID
-
-
-        // Check if any products found
-        if ($products->isEmpty()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No products found.',
-            ], 400);
-        }
-
+        // A vendor with no products is a normal, successful result — it is what
+        // every new vendor sees. This used to answer 400 / status:false, which
+        // the app maps onto its network-failure screen: the first thing a vendor
+        // saw after signing up was "We're unable to process your request. Please
+        // try again later." and a Retry button that could never succeed.
+        // Returning the empty paginator lets the client render an empty state.
         return response()->json([
-            'status' => true,
-            'message' => 'Products fetched successfully.',
-            'data' => $products,
+            'status'  => true,
+            'message' => $products->isEmpty()
+                ? 'No products found.'
+                : 'Products fetched successfully.',
+            'data'    => $products,
         ]);
     }
 
@@ -116,25 +113,23 @@ class ProductController extends Controller
     public function addProduct(Request $request)
     {
         try {
-            // $request->validate([
-            //     'name'                          => 'required|string|max:255|unique:products,name',
-            //     'vendor_id'                     => 'nullable|exists:vendor_type,id',
-            //     'category_id'                   => 'nullable|exists:categories,id',
-            //     'sub_category_id'               => 'nullable|exists:sub_categories,id',
-            //     'company_id'                    => 'nullable|exists:companies,id',
-            //     'company_product_categories_id' => 'nullable|exists:company_product_categories,id',
-            // 'sku'                           => 'nullable|string|max:100',
-            //     'barcode'                       => 'nullable|string|max:255',
-            //     'warranty'                      => 'nullable|string|max:255',
-            //     'description'                   => 'nullable|string',
-            //     'price'                         => 'nullable|numeric|min:0',
-            //     'modal_number'                  => 'nullable|string|max:100',
-            //     'expire_date'                   => 'nullable|date',
-            //     'new_stock'                     => 'nullable|numeric|min:0',
-            //     'status'                        => 'nullable|in:active,inactive',
-            //     'product_pic'                   => 'nullable|array',
-            //     'product_pic.*'                 => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            // ]);
+            $request->validate([
+                'name'                          => 'required|string|max:255',
+                'price'                         => 'required|numeric|min:0',
+                'modal_number'                  => 'required|string|max:100',
+                'category_id'                   => 'nullable|exists:categories,id',
+                'sub_category_id'               => 'nullable|exists:sub_categories,id',
+                'company_id'                    => 'nullable|exists:companies,id',
+                'company_product_categories_id' => 'nullable',
+                'barcode'                       => 'nullable|string|max:255',
+                'warranty'                      => 'nullable|string|max:255',
+                'description'                   => 'nullable|string',
+                'expire_date'                   => 'nullable|date',
+                'new_stock'                     => 'nullable|numeric|min:0',
+                'status'                        => 'nullable|in:active,inactive',
+                'product_pic'                   => 'nullable|array',
+                'product_pic.*'                 => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
 
 
             $modalNumber = strtolower(trim($request->modal_number));
@@ -299,7 +294,16 @@ class ProductController extends Controller
                 ], 400);
             }
 
-            $product->user_id                       = Auth::id() ?? $product->user_id;
+            if ($product->user_id !== Auth::id()) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'You are not authorized to update this product.',
+                ], 403);
+            }
+
+            // user_id is the owning vendor and is fixed at creation. It is never
+            // taken from the request, or a vendor could hand a product — and the
+            // orders and revenue hanging off it — to any other account.
             $product->vendor_id                     = $request->vendor_id ?? $product->vendor_id;
             $product->category_id                   = $request->category_id ?? $product->category_id;
             $product->sub_category_id               = $request->sub_category_id ?? $product->sub_category_id;
@@ -459,6 +463,12 @@ class ProductController extends Controller
                 ], 400);
             }
 
+            if ($product->user_id !== Auth::id()) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'You are not authorized to delete this product.',
+                ], 403);
+            }
 
             $existingImages = ProductImage::where('product_id', $id)->get();
             foreach ($existingImages as $existingImage) {

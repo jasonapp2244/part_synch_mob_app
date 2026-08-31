@@ -25,12 +25,15 @@
             $('#example').DataTable();
         }
         if ($('#example2').length) {
-            var table = $('#example2').DataTable({
+            // The DataTables Buttons extension is not bundled in
+            // public/admin/plugins/datatable, so the previous `buttons: [...]`
+            // config plus `table.buttons()` threw "table.buttons is not a
+            // function" and aborted this handler on every records page.
+            $('#example2').DataTable({
                 lengthChange: false,
-                buttons: ['copy', 'excel', 'pdf', 'print']
+                pageLength: 25,
+                order: []
             });
-            table.buttons().container()
-                .appendTo('#example2_wrapper .col-md-6:eq(0)');
         }
     });
 </script>

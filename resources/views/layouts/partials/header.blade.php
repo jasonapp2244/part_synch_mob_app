@@ -27,7 +27,7 @@
                     href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src="{{ asset('admin/images/avatars/avatar-2.png') }}" class="user-img" alt="user avatar">
                     <div class="user-info">
-                        <p class="user-name mb-0">{{ auth()->user()?->first_name ?? auth()->user()?->email ?? 'Admin' }}</p>
+                        <p class="user-name mb-0">{{ trim((auth()->user()?->first_name ?? '') . ' ' . (auth()->user()?->last_name ?? '')) ?: 'Admin' }}</p>
                         <p class="designattion mb-0">{{ auth()->user()?->email ?? 'Administrator' }}</p>
                     </div>
                 </a>

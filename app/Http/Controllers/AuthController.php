@@ -64,6 +64,12 @@ class AuthController extends Controller
 
             $user->save();
 
+            // Whether the verification email actually left the building. The
+            // client has to know: without the code the account can never be
+            // verified and can never sign in, so "created successfully" on its
+            // own is a lie the user only discovers at the OTP screen.
+            $otpEmailSent = true;
+
             try {
                 Mail::to($user->email)->send(new OtpMail(
                     ['otp' => $otp],
@@ -84,13 +90,17 @@ class AuthController extends Controller
                     $accountType === 'business' ? 'New Vendor Registered' : 'New User Registered'
                 ));
             } catch (\Exception $mailEx) {
+                $otpEmailSent = false;
                 Log::error('Email sending failed: ' . $mailEx->getMessage());
             }
 
             return response()->json([
-                'status'  => true,
-                'message' => 'Account created successfully. OTP sent (if email delivery succeeded).',
-                'data'    => $user,
+                'status'         => true,
+                'otp_email_sent' => $otpEmailSent,
+                'message'        => $otpEmailSent
+                    ? 'Account created successfully. We have emailed you a verification code.'
+                    : 'Account created, but we could not email your verification code. Please tap Resend, or contact support.',
+                'data'           => $user,
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -120,22 +130,38 @@ class AuthController extends Controller
         $otp        = str_pad((string) $otp_number, 4, '0', STR_PAD_LEFT);
         $user->otp = $otp;
         $user->otp_expires_at = now()->addMinutes(10);
-        if ($user->save()) {
+        if (! $user->save()) {
+            return response()->json([
+                'status'  => false,
+                'error'   => 'Failed to generate and send OTP.',
+                'message' => 'Failed to generate and send OTP.',
+            ], 500);
+        }
+
+        // Signup already guards its Mail::send; this one did not, so a mailer
+        // failure escaped as an unhandled TransportException — a 500 carrying a
+        // full stack trace, server paths and the SMTP username, straight to the
+        // phone. Report the failure as data instead.
+        try {
             Mail::to($user->email)->send(new OtpMail(
                 ['otp' => $otp],
                 'Mails.otp_generate',
                 'Your New OTP Code'
             ));
+        } catch (\Exception $mailEx) {
+            Log::error('Resend OTP email failed: ' . $mailEx->getMessage());
+
             return response()->json([
-                'status' => true,
-                'message' => 'New OTP sent successfully to your email.',
-            ]);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to generate and send OTP.',
-            ], 500);
+                'status'  => false,
+                'error'   => 'We could not send the email just now. Please try again shortly.',
+                'message' => 'We could not send the email just now. Please try again shortly.',
+            ], 503);
         }
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'New OTP sent successfully to your email.',
+        ]);
     }
 
     public function otpVerification(Request $request)
@@ -144,7 +170,7 @@ class AuthController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'email' => 'required|email',
-                'otp' => 'required|digits:4',
+                'otp'   => 'required|digits:4',
             ]);
 
             if ($validator->fails()) {
@@ -152,10 +178,18 @@ class AuthController extends Controller
                     'status'  => false,
                     'data'    => [],
                     'message' => 'Validation failed',
-                    'error'   => $validator->errors(),
+                    'error'   => $validator->errors()->all(),
                 ], 400);
             }
 
+            // Scope the code to the account it was issued for.
+            //
+            // This used to be User::where('otp', $request->otp)->first() — the
+            // email the client sends was accepted and then ignored, so ANY
+            // pending account holding that code was activated. With four digits
+            // and several signups in flight, guessing a code that belongs to
+            // somebody else is cheap. Matching on both columns means a code is
+            // only ever good for its own account.
             $otpCheck = User::where('email', $request->email)
                 ->where('otp', $request->otp)
                 ->first();
@@ -310,7 +344,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status'  => true,
-                'message' => 'New Password sent successfully to your email.',
+                'message' => 'New password sent successfully to your email.',
             ]);
         } catch (\Exception $e) {
             return response()->json([

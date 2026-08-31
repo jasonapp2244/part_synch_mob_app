@@ -12,8 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Rate limit every API route. Laravel 11 does not do this by default;
+        // the 'api' limiter is defined in AppServiceProvider::boot().
+        $middleware->throttleApi();
+
         $middleware->alias([
             'role'=> \App\Http\Middleware\RoleMiddleware::class,
+            'admin'=> \App\Http\Middleware\AdminMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

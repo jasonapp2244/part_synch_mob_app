@@ -79,6 +79,48 @@
             </a>
         </li>
 
+        <li class="menu-label">Moderation</li>
+
+        <li>
+            <a href="{{ route('admin.reports') }}" class="{{ request()->routeIs('admin.reports') ? 'mm-active' : '' }}">
+                <div class="parent-icon"><i class='bx bx-shield-quarter'></i></div>
+                <div class="menu-title">
+                    Reported Content
+                    @if(($pendingReportCount ?? 0) > 0)
+                        <span class="badge bg-danger ms-1">{{ $pendingReportCount }}</span>
+                    @endif
+                </div>
+            </a>
+        </li>
+
+        <li>
+            <a href="{{ route('admin.reviews') }}" class="{{ request()->routeIs('admin.reviews') ? 'mm-active' : '' }}">
+                <div class="parent-icon"><i class='bx bx-message-square-detail'></i></div>
+                <div class="menu-title">
+                    Product Reviews
+                    @if(($pendingReviewCount ?? 0) > 0)
+                        <span class="badge bg-warning ms-1">{{ $pendingReviewCount }}</span>
+                    @endif
+                </div>
+            </a>
+        </li>
+
+        <li class="menu-label">System</li>
+
+        <li>
+            <a href="{{ route('boost.packages') }}" class="{{ request()->routeIs('boost.packages') ? 'mm-active' : '' }}">
+                <div class="parent-icon"><i class='bx bx-rocket'></i></div>
+                <div class="menu-title">Boost Packages</div>
+            </a>
+        </li>
+
+        <li>
+            <a href="{{ route('admin.settings') }}" class="{{ request()->routeIs('admin.settings') ? 'mm-active' : '' }}">
+                <div class="parent-icon"><i class='bx bx-cog'></i></div>
+                <div class="menu-title">Settings</div>
+            </a>
+        </li>
+
     </ul>
     <!--end navigation-->
 </div>
