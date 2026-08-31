@@ -98,12 +98,6 @@ Route::get('/admin/boost-packages', [BoostPackageController::class, 'index']);
 // ────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
 
-    // ───────────── Auth & Profile (Any Role) ─────────────
-    Route::post('/reset_password', [AuthController::class, 'resetPassword']);
-    Route::get('/profile', [UserController::class, 'viewProfile']);
-    Route::post('/update_profile', [UserController::class, 'updateProfile']);
-    Route::post('/logout', [AuthController::class, 'logout']);
-
     // ───────────── Auth & Profile ─────────────
     Route::post('/reset_password', [AuthController::class, 'resetPassword']);
     Route::get('/profile', [UserController::class, 'viewProfile']);
