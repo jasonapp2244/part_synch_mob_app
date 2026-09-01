@@ -1,1 +1,4 @@
 * text=auto
+
+# Shell scripts must keep LF endings or bash fails with "bad interpreter: ...^M"
+*.sh text eol=lf

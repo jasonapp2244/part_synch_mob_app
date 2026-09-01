@@ -65,3 +65,39 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 "# part_synch_app" 
+
+## Deployment
+
+### One-time bootstrap (server has no `.git` yet)
+
+Run once, from the site root on the server:
+
+```bash
+git init \
+  && git remote add origin https://github.com/jasonapp2244/part_synch_mob_app.git \
+  && git fetch origin \
+  && git checkout -f -b main origin/main \
+  && chmod +x deploy.sh \
+  && ./deploy.sh
+```
+
+`.env`, `vendor/` and uploaded images are gitignored or untracked, so the
+checkout leaves them alone.
+
+### Every deploy after that
+
+```bash
+./deploy.sh            # main
+./deploy.sh staging    # staging
+```
+
+### Notes
+
+- **Never run `git clean -fd` here.** Uploads live under
+  `storage/app/public/` and are not gitignored, so `clean` would delete every
+  uploaded product and profile image.
+- **Never add `php artisan route:cache`.** Three routes are closures
+  (`routes/web.php`, `routes/api.php`) and Laravel cannot serialise those, so
+  route caching fails. `config:cache` and `view:cache` are fine and are already
+  in `deploy.sh`.
+- Requires PHP >= 8.2 (`deploy.sh` checks and stops if not).
